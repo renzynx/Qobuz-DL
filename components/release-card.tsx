@@ -146,7 +146,6 @@ const ReleaseCard = ({
                                         variant='ghost'
                                         size='icon'
                                         result={result as QobuzAlbum}
-                                        toast={toast}
                                         setStatusBar={setStatusBar}
                                         ffmpegState={ffmpegState}
                                         settings={settings}
@@ -286,7 +285,6 @@ const ReleaseCard = ({
                                 </div>
                                 <DownloadAlbumButton
                                     result={result as QobuzAlbum}
-                                    toast={toast}
                                     setStatusBar={setStatusBar}
                                     ffmpegState={ffmpegState}
                                     settings={settings}

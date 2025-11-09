@@ -8,6 +8,7 @@ import { FetchedQobuzAlbum, formatTitle, getFullAlbumInfo, QobuzAlbum } from '@/
 import { createDownloadJob } from '@/lib/download-job';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { useCountry } from '@/lib/country-provider';
+import { toast } from 'sonner';
 
 export interface DownloadAlbumButtonProps extends ButtonProps {
     result: QobuzAlbum;
@@ -18,7 +19,6 @@ export interface DownloadAlbumButtonProps extends ButtonProps {
     setFetchedAlbumData: React.Dispatch<React.SetStateAction<FetchedQobuzAlbum | null>>;
     onOpen?: () => void;
     onClose?: () => void;
-    toast: (toast: any) => void;
 }
 
 const DownloadButton = React.forwardRef<HTMLButtonElement, DownloadAlbumButtonProps>(
@@ -34,7 +34,6 @@ const DownloadButton = React.forwardRef<HTMLButtonElement, DownloadAlbumButtonPr
             setStatusBar,
             ffmpegState,
             settings,
-            toast,
             fetchedAlbumData,
             setFetchedAlbumData,
             ...props
@@ -58,11 +57,8 @@ const DownloadButton = React.forwardRef<HTMLButtonElement, DownloadAlbumButtonPr
                     <DropdownMenuContent>
                         <DropdownMenuItem
                             onClick={() => {
-                                createDownloadJob(result, setStatusBar, ffmpegState, settings, toast, fetchedAlbumData, setFetchedAlbumData, country);
-                                toast({
-                                    title: `Added '${formatTitle(result)}'`,
-                                    description: 'The album has been added to the queue'
-                                });
+                                createDownloadJob(result, setStatusBar, ffmpegState, settings, fetchedAlbumData, setFetchedAlbumData, country);
+                                toast.info(`Added '${formatTitle(result)}'`);
                             }}
                             className='flex items-center gap-2'
                         >
@@ -79,7 +75,6 @@ const DownloadButton = React.forwardRef<HTMLButtonElement, DownloadAlbumButtonPr
                                             setStatusBar,
                                             ffmpegState,
                                             settings,
-                                            toast,
                                             albumData,
                                             setFetchedAlbumData,
                                             country
@@ -87,10 +82,8 @@ const DownloadButton = React.forwardRef<HTMLButtonElement, DownloadAlbumButtonPr
                                         await new Promise((resolve) => setTimeout(resolve, 100));
                                     }
                                 }
-                                toast({
-                                    title: `Added '${formatTitle(result)}'`,
-                                    description: 'The album has been added to the queue'
-                                });
+
+                                toast.info(`Added '${formatTitle(result)}'`);
                             }}
                             className='flex items-center gap-2'
                         >
