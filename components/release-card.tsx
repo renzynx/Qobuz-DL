@@ -27,8 +27,8 @@ import { Skeleton } from './ui/skeleton';
 import { useFFmpeg } from '@/lib/ffmpeg-provider';
 import { useSettings } from '@/lib/settings-provider';
 import { useStatusBar } from '@/lib/status-bar/context';
-import { useToast } from '@/hooks/use-toast';
 import { useCountry } from '@/lib/country-provider';
+import { toast } from 'sonner';
 
 const ReleaseCard = ({
     result,
@@ -49,8 +49,6 @@ const ReleaseCard = ({
     const [openTracklist, setOpenTracklist] = useState(false);
     const [fetchedAlbumData, setFetchedAlbumData] = useState<FetchedQobuzAlbum | null>(null);
     const [focusCard, setFocusCard] = useState(false);
-
-    const { toast } = useToast();
 
     const album = getAlbum(result) || null;
 
@@ -135,7 +133,6 @@ const ReleaseCard = ({
                                                 setStatusBar,
                                                 ffmpegState,
                                                 settings,
-                                                toast as any,
                                                 fetchedAlbumData,
                                                 setFetchedAlbumData,
                                                 country
@@ -343,15 +340,11 @@ const ReleaseCard = ({
                                                                     setStatusBar,
                                                                     ffmpegState,
                                                                     settings,
-                                                                    toast as any,
                                                                     undefined,
                                                                     undefined,
                                                                     country
                                                                 );
-                                                                toast({
-                                                                    title: `Added '${formatTitle(track)}' to the queue`,
-                                                                    description: 'Track has been added to the queue'
-                                                                });
+                                                                toast.info(`Added '${formatTitle(track)}' to the queue`);
                                                             }}
                                                         >
                                                             <DownloadIcon className='!size-4' />

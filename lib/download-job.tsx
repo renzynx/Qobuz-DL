@@ -8,15 +8,14 @@ import { Disc3Icon, DiscAlbumIcon } from 'lucide-react';
 import { FetchedQobuzAlbum, formatTitle, getFullResImageUrl, QobuzAlbum, QobuzArtistResults, QobuzTrack } from './qobuz-dl';
 import { SettingsProps } from './settings-provider';
 import { StatusBarProps } from '@/components/status-bar/status-bar';
-import { ToastAction } from '@/components/ui/toast';
 import { zipSync } from 'fflate';
+import { toast } from 'sonner';
 
 export const createDownloadJob = async (
     result: QobuzAlbum | QobuzTrack,
     setStatusBar: React.Dispatch<React.SetStateAction<StatusBarProps>>,
     ffmpegState: FFmpegType,
     settings: SettingsProps,
-    toast: (toast: any) => void,
     fetchedAlbumData?: FetchedQobuzAlbum | null,
     setFetchedAlbumData?: React.Dispatch<React.SetStateAction<FetchedQobuzAlbum | null>>,
     country?: string
@@ -84,21 +83,19 @@ export const createDownloadJob = async (
                             proceedDownload(objectURL, title);
                             resolve();
                         } else {
-                            toast({
-                                title: 'Error',
-                                description: `Qobuz provided a file shorter than expected for "${title}". This can indicate the file being a sample track rather than the full track`,
-                                duration: Infinity,
-                                action: (
-                                    <ToastAction
-                                        altText='Copy Stack'
-                                        onClick={() => {
+                            toast.error(
+                                `Qobuz provided a file shorter than expected for "${title}". This can indicate the file being a sample track rather than the full track`,
+                                {
+                                    action: {
+                                        label: 'Download anyway',
+                                        onClick: () => {
                                             proceedDownload(objectURL, title);
-                                        }}
-                                    >
-                                        Download anyway
-                                    </ToastAction>
-                                )
-                            });
+                                        }
+                                    },
+                                    duration: Infinity
+                                }
+                            );
+
                             resolve();
                         }
                     };
@@ -106,15 +103,13 @@ export const createDownloadJob = async (
                 } catch (e) {
                     if (e instanceof AxiosError && e.code === 'ERR_CANCELED') resolve();
                     else {
-                        toast({
-                            title: 'Error',
-                            description: e instanceof Error ? e.message : 'An unknown error occurred',
-                            action: (
-                                <ToastAction altText='Copy Stack' onClick={() => navigator.clipboard.writeText((e as Error).stack!)}>
-                                    Copy Stack
-                                </ToastAction>
-                            )
+                        toast.error(e instanceof Error ? e.message : 'An unknown error occurred', {
+                            action: {
+                                label: 'Copy Stack',
+                                onClick: () => navigator.clipboard.writeText((e as Error).stack!)
+                            }
                         });
+
                         resolve();
                     }
                 }
@@ -255,15 +250,13 @@ export const createDownloadJob = async (
                 } catch (e) {
                     if (e instanceof AxiosError && e.code === 'ERR_CANCELED') resolve();
                     else {
-                        toast({
-                            title: 'Error',
-                            description: e instanceof Error ? e.message : 'An unknown error occurred',
-                            action: (
-                                <ToastAction altText='Copy Stack' onClick={() => navigator.clipboard.writeText((e as Error).stack!)}>
-                                    Copy Stack
-                                </ToastAction>
-                            )
+                        toast.error(e instanceof Error ? e.message : 'An unknown error occurred', {
+                            action: {
+                                label: 'Copy Stack',
+                                onClick: () => navigator.clipboard.writeText((e as Error).stack!)
+                            }
                         });
+
                         resolve();
                     }
                 }
@@ -299,7 +292,7 @@ export async function downloadArtistDiscography(
             artistResults = (await loadArtistResults(setArtistResults)) as QobuzArtistResults;
         }
         for (const release of artistResults.artist.releases[type].items) {
-            await createDownloadJob(release, setStatusBar, ffmpegState, settings, toast, undefined, undefined, country);
+            await createDownloadJob(release, setStatusBar, ffmpegState, settings, undefined, undefined, country);
         }
     }
     toast({

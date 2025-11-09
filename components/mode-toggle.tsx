@@ -4,14 +4,7 @@ import * as React from 'react';
 import { useTheme } from 'next-themes';
 
 import { Button } from '@/components/ui/button';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuLabel,
-    DropdownMenuRadioGroup,
-    DropdownMenuRadioItem,
-    DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ChevronDownIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -20,79 +13,35 @@ export const getHex = (themeValue: string, resolvedTheme: string | undefined): s
         return resolvedTheme === 'light' ? '#000000' : '#FFFFFF';
     }
 
-    return themes.flatMap((group) => group.themes).find((theme) => theme.value.toLowerCase() === themeValue.toLowerCase())?.hex || '#FFFFFFF';
+    return themes.find((theme) => theme.value.toLowerCase() === themeValue.toLowerCase())?.hex || '#FFFFFF';
 };
 
 export const themes = [
     {
-        group: 'Base',
-        themes: [
-            {
-                value: 'light',
-                label: 'Light',
-                hex: '#000000'
-            },
-            {
-                value: 'dark',
-                label: 'Dark',
-                hex: '#FFFFFF'
-            },
-            {
-                value: 'system',
-                label: 'System',
-                hex: 'auto'
-            }
-        ]
+        value: 'light',
+        label: 'Light',
+        hex: '#000000'
     },
     {
-        group: 'Colored',
-        themes: [
-            {
-                value: 'purple',
-                label: 'Purple',
-                hex: '#8b5cf6'
-            },
-            {
-                value: 'pink',
-                label: 'Pink',
-                hex: '#ec4899'
-            },
-            {
-                value: 'blue',
-                label: 'Blue',
-                hex: '#3b82f6'
-            },
-            {
-                value: 'green',
-                label: 'Green',
-                hex: '#16a34a'
-            },
-            {
-                value: 'red',
-                label: 'Red',
-                hex: '#f43f5e'
-            },
-            {
-                value: 'orange',
-                label: 'Orange',
-                hex: '#f97316'
-            },
-            {
-                value: 'yellow',
-                label: 'Yellow',
-                hex: '#fbbf24'
-            }
-        ]
+        value: 'dark',
+        label: 'Dark',
+        hex: '#FFFFFF'
+    },
+    {
+        value: 'system',
+        label: 'System',
+        hex: 'auto'
     }
 ];
 
 export function ModeToggle() {
     const { setTheme, theme } = useTheme();
-    const [position, setPosition] = useState<string>(theme!);
+    const [position, setPosition] = useState<string>(theme || 'dark');
 
     useEffect(() => {
-        document.documentElement.classList.remove(...Array.from(document.documentElement.classList));
-        document.documentElement.classList.add(theme!);
+        if (theme) {
+            setPosition(theme);
+        }
     }, [theme]);
 
     return (
@@ -112,22 +61,9 @@ export function ModeToggle() {
                     }}
                 >
                     {themes.map((theme) => (
-                        <DropdownMenuRadioGroup key={theme.group} value={position}>
-                            <DropdownMenuLabel className='capitalize'>{theme.group}</DropdownMenuLabel>
-                            {theme.themes.map((theme) => (
-                                <DropdownMenuRadioItem
-                                    key={theme.value}
-                                    value={theme.value}
-                                    className='capitalize'
-                                    onClick={() => {
-                                        setPosition(theme.value);
-                                        setTheme(theme.value);
-                                    }}
-                                >
-                                    {theme.label}
-                                </DropdownMenuRadioItem>
-                            ))}
-                        </DropdownMenuRadioGroup>
+                        <DropdownMenuRadioItem key={theme.value} value={theme.value} className='capitalize'>
+                            {theme.label}
+                        </DropdownMenuRadioItem>
                     ))}
                 </DropdownMenuRadioGroup>
             </DropdownMenuContent>

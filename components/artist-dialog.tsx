@@ -15,8 +15,8 @@ import { useInView } from 'react-intersection-observer';
 import { useSettings } from '@/lib/settings-provider';
 import { useStatusBar } from '@/lib/status-bar/context';
 import { useTheme } from 'next-themes';
-import { useToast } from '@/hooks/use-toast';
 import { useCountry } from '@/lib/country-provider';
+import { toast } from 'sonner';
 
 export type CategoryType = {
     label: string;
@@ -58,7 +58,7 @@ const ArtistDialog = ({ open, setOpen, artist }: { open: boolean; setOpen: (open
             const response = await axios.get(`/api/get-artist`, { params: { artist_id: artist.id }, headers: { 'Token-Country': country } });
             setArtistResults(parseArtistData(response.data.data));
         } catch {
-            toast({ title: 'Error', description: 'Could not fetch artist data, check your token' });
+            toast.error('Could not fetch artist data, check your token');
         }
     };
 
@@ -99,7 +99,6 @@ const ArtistDialog = ({ open, setOpen, artist }: { open: boolean; setOpen: (open
     }, [open]);
 
     const { setStatusBar } = useStatusBar();
-    const { toast } = useToast();
     const { settings } = useSettings();
     const { ffmpegState } = useFFmpeg();
     return (
@@ -243,7 +242,6 @@ const ArtistReleaseSection = ({
     }, [isInView]);
 
     const { setStatusBar } = useStatusBar();
-    const { toast } = useToast();
     const { settings } = useSettings();
     const { ffmpegState } = useFFmpeg();
     return (
