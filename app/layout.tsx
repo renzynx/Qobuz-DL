@@ -1,19 +1,20 @@
-import ChangelogDialog from '@/components/ui/changelog-dialog';
 import ParticlesComponent from '@/components/particles';
-import SettingsForm from '@/components/ui/settings-form';
 import StatusBarContainer from '@/components/status-bar/container';
-import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { FaDiscord } from '@react-icons/all-files/fa/FaDiscord';
-import { FaGithub } from '@react-icons/all-files/fa/FaGithub';
-import { FFmpegProvider } from '@/lib/ffmpeg-provider';
-import { Inter } from 'next/font/google';
-import type { Metadata } from 'next';
-import { SettingsProvider } from '@/lib/settings-provider';
-import { StatusBarProvider } from '@/lib/status-bar/context';
 import { ThemeProvider } from '@/components/theme-provider';
+import { Button } from '@/components/ui/button';
+import ChangelogDialog from '@/components/ui/changelog-dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import SettingsForm from '@/components/ui/settings-form';
 import { Toaster } from '@/components/ui/sonner';
 import { CountryProvider } from '@/lib/country-provider';
+import { FFmpegProvider } from '@/lib/ffmpeg-provider';
+import { SettingsProvider } from '@/lib/settings-provider';
+import { StatusBarProvider } from '@/lib/status-bar/context';
+import { FaDiscord } from '@react-icons/all-files/fa/FaDiscord';
+import { FaGithub } from '@react-icons/all-files/fa/FaGithub';
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import Script from 'next/script';
 import './globals.css';
 
 const inter = Inter({
@@ -102,8 +103,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                                 </ThemeProvider>
                             </SettingsProvider>
                         </StatusBarProvider>
-                        <script src='https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.9.7/dist/ffmpeg.min.js'></script>
-                        <script src='https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js'></script>
+                        <Script src='https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.9.7/dist/ffmpeg.min.js' strategy='beforeInteractive' />
+                        <Script src='https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js' strategy='beforeInteractive' />
                     </CountryProvider>
                 </FFmpegProvider>
             </body>

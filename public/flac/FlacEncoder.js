@@ -26,6 +26,9 @@
 
 ( function( global ) {
 	'use strict';
+
+	var CDN_BASE = 'https://cdn.jsdelivr.net/gh/renzynx/qobuz-dl@main/public/flac/';
+
 	var MainScriptLoader,
 		downloadCompleted,
 		downloadError;
@@ -42,7 +45,7 @@
 			MainScriptLoader.downloadAndExecute( data, function() {
 				// Before execute main script ...
 				if ( !global.EmsArgs ){
-					importScripts( 'EmsArgs.js' );
+					importScripts( CDN_BASE + 'EmsArgs.js' );
 				}
 				FlacEncoder.setUpModule( data );
 			}, function() {
@@ -59,7 +62,7 @@
 			}
 			FlacEncoder.setUpLogging( data );
 			MainScriptLoader.xhrload( data );
-			importScripts( 'EmsArgs.js' );
+			importScripts( CDN_BASE + 'EmsArgs.js' );
 		},
 
 		setUpLogging: function( data ) {
@@ -130,7 +133,7 @@
 					console.log( 'Loading run dependencies. Outstanding: ' + runDeps );
 				},
 				locateFile: function( memFile ) {
-					return memFile
+					return  CDN_BASE + memFile
 						.replace( /^flac\.(html|js)\.mem$/, 'asm/flac.mem.png' )
 						.replace( 'flac.wasm', 'wasm/flac.wasm.png' );
 				}
@@ -290,7 +293,7 @@
 	 *  @private
 	 */
 	MainScriptLoader = {
-		name: ( global.WebAssembly ? 'wasm/' : 'asm/' ) + 'flac.js',
+		name:  CDN_BASE + ( global.WebAssembly ? 'wasm/' : 'asm/' ) + 'flac.js',
 		text: null,
 		status: 'idle',
 		xhrload: function( data, complete, err ) {
