@@ -1,5 +1,6 @@
 import GrainField from '@/components/grain-field';
 import MotionProvider from '@/components/motion-provider';
+import PlayerBar from '@/components/player/player-bar';
 import StatusBarContainer from '@/components/status-bar/container';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { APPLICATION_NAME, IS_DEFAULT_APPLICATION_NAME } from '@/lib/app-config';
 import { CountryProvider } from '@/lib/country-provider';
 import { FFmpegProvider } from '@/lib/ffmpeg-provider';
+import { PlayerProvider } from '@/lib/player/context';
 import { SettingsProvider } from '@/lib/settings-provider';
 import { StatusBarProvider } from '@/lib/status-bar/context';
 import { FaGithub } from '@react-icons/all-files/fa/FaGithub';
@@ -66,31 +68,34 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                     <MotionProvider>
                         <CountryProvider>
                             <StatusBarProvider>
-                                <SettingsProvider>
-                                    <ThemeProvider attribute='class' defaultTheme='dark' enableSystem>
-                                        <GrainField />
-                                        <div className='fixed justify-between items-start flex w-full max-w-screen p-4 z-[10]'>
-                                            <div className='flex flex-col gap-2'>
-                                                <SettingsForm />
-                                                <ChangelogDialog />
+                                <PlayerProvider>
+                                    <SettingsProvider>
+                                        <ThemeProvider attribute='class' defaultTheme='dark' enableSystem>
+                                            <GrainField />
+                                            <div className='fixed justify-between items-start flex w-full max-w-screen p-4 z-[10]'>
+                                                <div className='flex flex-col gap-2'>
+                                                    <SettingsForm />
+                                                    <ChangelogDialog />
+                                                </div>
+                                                <div className='flex gap-2 items-center'>
+                                                    <a href='https://github.com/d0nj/Qobuz-DL' target='_blank' rel='noopener noreferrer'>
+                                                        <Button variant='ghost' size='icon'>
+                                                            <FaGithub />
+                                                        </Button>
+                                                    </a>
+                                                </div>
                                             </div>
-                                            <div className='flex gap-2 items-center'>
-                                                <a href='https://github.com/d0nj/Qobuz-DL' target='_blank' rel='noopener noreferrer'>
-                                                    <Button variant='ghost' size='icon'>
-                                                        <FaGithub />
-                                                    </Button>
-                                                </a>
+                                            <div className='flex flex-col min-h-screen'>
+                                                <main className='px-6 pb-12 pt-28 md:pt-24 2xl:pt-40 min-h-full flex-1 flex flex-col items-center justify-center gap-2 z-[2] overflow-x-hidden max-w-screen overflow-y-hidden'>
+                                                    {children}
+                                                </main>
+                                                <PlayerBar />
+                                                <Toaster closeButton richColors />
+                                                <StatusBarContainer />
                                             </div>
-                                        </div>
-                                        <div className='flex flex-col min-h-screen'>
-                                            <main className='px-6 pb-12 pt-28 md:pt-24 2xl:pt-40 min-h-full flex-1 flex flex-col items-center justify-center gap-2 z-[2] overflow-x-hidden max-w-screen overflow-y-hidden'>
-                                                {children}
-                                            </main>
-                                            <Toaster closeButton richColors />
-                                            <StatusBarContainer />
-                                        </div>
-                                    </ThemeProvider>
-                                </SettingsProvider>
+                                        </ThemeProvider>
+                                    </SettingsProvider>
+                                </PlayerProvider>
                             </StatusBarProvider>
                         </CountryProvider>
                         <Script src='https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.9.7/dist/ffmpeg.min.js' strategy='beforeInteractive' />

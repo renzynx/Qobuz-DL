@@ -16,6 +16,7 @@ Qobuz-DL provides a fast and easy way to download music using Qobuz in a variety
 - Apply metadata to downloaded songs.
 - Optionally embed lyrics fetched from [LRCLIB](https://lrclib.net), including time-synced LRC.
 - Search the catalogue by album, track, or artist, with country-aware availability.
+- Listen before or instead of downloading, at the highest quality Qobuz offers, with synced lyrics.
 - Bulk-download an artist's discography, with ZIP or individual-file output.
 
 ## Deploy to Vercel

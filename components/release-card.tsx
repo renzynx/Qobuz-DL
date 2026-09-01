@@ -2,7 +2,7 @@ import ArtistDialog from './artist-dialog';
 import DownloadAlbumButton from './download-album-button';
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
-import { AlignJustifyIcon, DotIcon, DownloadIcon, UsersIcon, DiscAlbumIcon } from 'lucide-react';
+import { AlignJustifyIcon, DiscAlbumIcon, DotIcon, DownloadIcon, ListPlusIcon, ListStartIcon, PlayIcon, UsersIcon } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { download } from '@/lib/download-job';
@@ -24,10 +24,30 @@ import { ScrollArea } from './ui/scroll-area';
 import { Separator } from './ui/separator';
 import { Skeleton } from './ui/skeleton';
 import { useFFmpeg } from '@/lib/ffmpeg-provider';
+import { usePlayer } from '@/lib/player/context';
 import { useSettings } from '@/lib/settings-provider';
 import { useStatusBar } from '@/lib/status-bar/context';
 import { useCountry } from '@/lib/country-provider';
 import { toast } from 'sonner';
+
+/**
+ * The track a play tap should start from: the tapped track itself, or the
+ * first streamable one of its album. `null` while an album's first playable
+ * track is still being resolved — a play button with nothing to hand the
+ * player yet must not fire it.
+ */
+const trackToStart = async (
+    item: ReturnType<typeof describeCatalogueItem>,
+    fetchedAlbumData: FetchedQobuzAlbum | null,
+    setFetchedAlbumData: React.Dispatch<React.SetStateAction<FetchedQobuzAlbum | null>>,
+    result: QobuzAlbum | QobuzTrack | QobuzArtist,
+    country: string | undefined
+): Promise<QobuzTrack | null> => {
+    if (item.isTrack) return (result as QobuzTrack).streamable ? (result as QobuzTrack) : null;
+    if (item.isArtist || !item.album) return null;
+    const album = await getFullAlbumInfo(fetchedAlbumData, setFetchedAlbumData, item.album, country).catch(() => null);
+    return album?.tracks.items.find((track) => track.streamable) ?? null;
+};
 
 const ReleaseCard = ({
     result,
@@ -46,6 +66,7 @@ const ReleaseCard = ({
     const { ffmpegState } = useFFmpeg();
     const { setStatusBar } = useStatusBar();
     const { settings } = useSettings();
+    const { play, playNextTrack, enqueue } = usePlayer();
 
     const [openTracklist, setOpenTracklist] = useState(false);
     const [fetchedAlbumData, setFetchedAlbumData] = useState<FetchedQobuzAlbum | null>(null);
@@ -125,6 +146,25 @@ const ReleaseCard = ({
                         </div>
                         {!item.isArtist && (
                             <div className='flex items-center justify-between gap-4 p-2 pointer-events-auto'>
+                                <Button
+                                    title={`Play '${formatTitle(result)}'`}
+                                    aria-label={`Play '${formatTitle(result)}'`}
+                                    size='icon'
+                                    variant='ghost'
+                                    className='size-11 touch-manipulation active:scale-95 transition-transform'
+                                    onClick={async () => {
+                                        const start = await trackToStart(item, fetchedAlbumData, setFetchedAlbumData, result, country);
+                                        if (!start) {
+                                            // Nothing streamable: the tap must say so rather than
+                                            // doing nothing, or the button reads as broken.
+                                            toast.error(`'${formatTitle(result)}' is not available to play.`);
+                                            return;
+                                        }
+                                        play(start);
+                                    }}
+                                >
+                                    <PlayIcon />
+                                </Button>
                                 {item.isTrack ? (
                                     <Button
                                         size='icon'
@@ -162,6 +202,8 @@ const ReleaseCard = ({
                                 )}
                                 {item.isTrack ? null : (
                                     <Button
+                                        title='Tracklist'
+                                        aria-label='Tracklist'
                                         size='icon'
                                         variant='ghost'
                                         className='size-11 touch-manipulation active:scale-95 transition-transform'
@@ -333,22 +375,54 @@ const ReleaseCard = ({
                                                         <p className='truncate font-medium'>{formatTitle(track)}</p>
                                                     </div>
                                                     {track.streamable && (
-                                                        <Button
-                                                            title={`Download '${formatTitle(track)}'`}
-                                                            className='flex md:hidden justify-center aspect-square h-11 w-11 [&_svg]:size-5 hover:bg-transparent touch-manipulation active:scale-95 transition-transform'
-                                                            size='icon'
-                                                            variant='ghost'
-                                                            onClick={async () => {
-                                                                await download(
-                                                                    { target: track, settings, country },
-                                                                    setStatusBar,
-                                                                    ffmpegState
-                                                                );
-                                                                toast.info(`Added '${formatTitle(track)}' to the queue`);
-                                                            }}
-                                                        >
-                                                            <DownloadIcon className='!size-4' />
-                                                        </Button>
+                                                        <div className='flex items-center shrink-0'>
+                                                            <Button
+                                                                title={`Play '${formatTitle(track)}'`}
+                                                                aria-label={`Play '${formatTitle(track)}'`}
+                                                                className='flex justify-center aspect-square h-11 w-11 [&_svg]:size-5 hover:bg-transparent touch-manipulation active:scale-95 transition-transform'
+                                                                size='icon'
+                                                                variant='ghost'
+                                                                onClick={() => play(track)}
+                                                            >
+                                                                <PlayIcon className='!size-4' />
+                                                            </Button>
+                                                            <Button
+                                                                title={`Play '${formatTitle(track)}' next`}
+                                                                aria-label={`Play '${formatTitle(track)}' next`}
+                                                                className='flex justify-center aspect-square h-11 w-11 [&_svg]:size-5 hover:bg-transparent touch-manipulation active:scale-95 transition-transform'
+                                                                size='icon'
+                                                                variant='ghost'
+                                                                onClick={() => playNextTrack(track)}
+                                                            >
+                                                                <ListStartIcon className='!size-4' />
+                                                            </Button>
+                                                            <Button
+                                                                title={`Add '${formatTitle(track)}' to queue`}
+                                                                aria-label={`Add '${formatTitle(track)}' to queue`}
+                                                                className='flex justify-center aspect-square h-11 w-11 [&_svg]:size-5 hover:bg-transparent touch-manipulation active:scale-95 transition-transform'
+                                                                size='icon'
+                                                                variant='ghost'
+                                                                onClick={() => enqueue(track)}
+                                                            >
+                                                                <ListPlusIcon className='!size-4' />
+                                                            </Button>
+                                                            <Button
+                                                                title={`Download '${formatTitle(track)}'`}
+                                                                className='flex md:hidden justify-center aspect-square h-11 w-11 [&_svg]:size-5 hover:bg-transparent touch-manipulation active:scale-95 transition-transform'
+                                                                size='icon'
+                                                                variant='ghost'
+                                                                onClick={async () => {
+                                                                    await download(
+                                                                        { target: track, settings, country },
+                                                                        setStatusBar,
+                                                                        ffmpegState
+                                                                    );
+                                                                    toast.info(`Added '${formatTitle(track)}' to the queue`);
+                                                                }}
+                                                            >
+                                                                <DownloadIcon className='!size-4' />
+                                                            </Button>
+                                                        </div>
                                                     )}
                                                 </div>
                                                 {index < fetchedAlbumData.tracks.items.length - 1 && <Separator />}
