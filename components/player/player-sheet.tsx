@@ -39,9 +39,10 @@ const PlayerSheet = ({ open, onClose }: PlayerSheetProps) => {
             animate={{ y: 0, opacity: 1 }}
             role='dialog'
             aria-label={`Now playing ${title} by ${artist}`}
-            className='pointer-events-auto container flex flex-col gap-4 border border-border bg-card p-4'
+            className='pointer-events-auto container flex min-h-0 flex-1 flex-col gap-4 border border-border bg-card p-4'
         >
-            <div className='flex items-start justify-between'>
+            {/* Fixed: the header never scrolls away from the close control. */}
+            <div className='flex shrink-0 items-start justify-between'>
                 <p className='index-numeral text-muted-foreground'>Now playing</p>
                 <Button
                     variant='ghost'
@@ -54,11 +55,14 @@ const PlayerSheet = ({ open, onClose }: PlayerSheetProps) => {
                     <X />
                 </Button>
             </div>
-            <div className='flex flex-col items-center gap-4'>
-                <div className='size-40 overflow-hidden border border-border/60 bg-secondary'>
+            {/* The scroll region: on a short viewport the artwork and lyrics
+                scroll inside the sheet instead of pushing the transport off
+                the bottom or the header above the fold. */}
+            <div className='flex min-h-0 flex-1 flex-col items-center gap-4 overflow-y-auto'>
+                <div className='size-40 shrink-0 overflow-hidden border border-border/60 bg-secondary'>
                     {track.album?.image?.large ? <img src={track.album.image.large} alt={title} className='size-full object-cover' /> : null}
                 </div>
-                <div className='flex min-w-0 flex-col items-center'>
+                <div className='flex min-w-0 shrink-0 flex-col items-center'>
                     <p className='truncate text-sm font-medium text-foreground' title={title}>
                         {title}
                     </p>
@@ -66,6 +70,8 @@ const PlayerSheet = ({ open, onClose }: PlayerSheetProps) => {
                         {artist}
                     </p>
                 </div>
+                {/* Transport stays out of the scroll region: the seek bar and
+                    the buttons are the controls, always reachable. */}
                 <Slider
                     aria-label='Seek'
                     value={[Math.min(scrub ?? position, duration)]}
@@ -76,9 +82,9 @@ const PlayerSheet = ({ open, onClose }: PlayerSheetProps) => {
                         setScrub(null);
                         seek(values[0] ?? 0);
                     }}
-                    className='w-full'
+                    className='w-full shrink-0'
                 />
-                <div className='flex items-center gap-2'>
+                <div className='flex shrink-0 items-center gap-2'>
                     <Button
                         variant='ghost'
                         size='icon'

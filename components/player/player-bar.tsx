@@ -36,7 +36,7 @@ const PlayerBar = () => {
     const artist = formatArtists(track);
 
     return (
-        <div className='pointer-events-none mx-auto flex w-full max-w-screen flex-col gap-2 px-4 pb-4 pt-3'>
+        <div className='pointer-events-none mx-auto flex min-h-0 w-full max-w-screen flex-1 flex-col gap-2 px-4 pb-4 pt-3'>
             <PlayerSheet open={expanded} onClose={() => setExpanded(false)} />
             <motion.div
                 data-testid='player-bar'
@@ -53,7 +53,7 @@ const PlayerBar = () => {
                     event.preventDefault();
                     setExpanded((open) => !open);
                 }}
-                className={`pointer-events-auto container flex cursor-pointer items-center gap-3 border border-border bg-card p-2${state.playing ? ' lime-lamp' : ''}`}
+                className={`pointer-events-auto container flex shrink-0 cursor-pointer items-center gap-3 border border-border bg-card p-2${state.playing ? ' lime-lamp' : ''}`}
             >
                 <div className='relative size-11 shrink-0 overflow-hidden border border-border/60 bg-secondary'>
                     {track.album?.image?.small ? <img src={track.album.image.small} alt={title} className='size-full object-cover' /> : null}

@@ -39,9 +39,12 @@ const LyricsView = ({ syncedLyrics, plain, position }: LyricsViewProps) => {
         currentRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
     }, [currentIndex]);
 
+    // `shrink-0` on the scroll boxes: the sheet's scroll region is a flex
+    // column, and without it these collapse to a line and scroll inside
+    // themselves instead of letting the sheet scroll.
     if (syncedLyrics) {
         return (
-            <div className='flex max-h-64 flex-col gap-2 overflow-y-auto py-2'>
+            <div className='flex max-h-64 shrink-0 flex-col gap-2 overflow-y-auto py-2'>
                 {syncedLyrics.map((line, index) => (
                     <span
                         key={`${line.time}-${line.line}`}
@@ -65,7 +68,7 @@ const LyricsView = ({ syncedLyrics, plain, position }: LyricsViewProps) => {
     if (!plain) return null;
 
     return (
-        <div className='flex max-h-64 flex-col gap-2 overflow-y-auto py-2'>
+        <div className='flex max-h-64 shrink-0 flex-col gap-2 overflow-y-auto py-2'>
             {plain.split('\n').map((line, index) => (
                 <span key={`${index}-${line}`} className='text-center text-sm text-muted-foreground'>
                     {line}

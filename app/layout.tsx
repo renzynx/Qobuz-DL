@@ -92,7 +92,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                                                 {/* One dock owns the page floor: the download strip and
                                                     the player plate are rows of the same unit, never two
                                                     floating bands stacked over each other. */}
-                                                <div className='sticky bottom-0 z-[30] w-full border-t border-border bg-background'>
+                                                {/* `max-h-dvh` caps the dock at the viewport so the expanded sheet
+                                                    grows into that budget and scrolls internally, instead of
+                                                    pushing the transport past the fold on a short screen. */}
+                                                <div className='sticky bottom-0 z-[30] flex w-full max-h-dvh flex-col border-t border-border bg-background'>
                                                     <StatusBarContainer />
                                                     <PlayerBar />
                                                 </div>
