@@ -10,30 +10,22 @@ import { QobuzSearchResults } from '@/lib/qobuz-dl';
 import AutocompleteCard from './autocomplete-card';
 import { useCountry } from '@/lib/country-provider';
 import CountryPicker from '../country-picker';
+import { emitSearch, emitSearching } from '@/lib/search/bus';
 
-const SearchBar = ({
-    onSearch,
-    searching,
-    setSearching,
-    query
-}: {
-    onSearch: (query: string, searchFieldInput?: 'albums' | 'tracks') => void;
-    searching: boolean;
-    setSearching: React.Dispatch<React.SetStateAction<boolean>>;
-    query: string;
-}) => {
-    const [searchInput, setSearchInput] = useState(query);
+/**
+ * The shell's search pill: self-contained state, publishing through the
+ * search bus. It owns the query and the busy flag; the results view listens.
+ */
+const SearchBar = () => {
+    const [searchInput, setSearchInput] = useState('');
     const [results, setResults] = useState<QobuzSearchResults | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [showCard, setShowCard] = useState(false);
+    const [searching, setSearching] = useState<boolean>(false);
     const [controller, setController] = useState<AbortController>(new AbortController());
 
     const inputRef = useRef<HTMLInputElement>(null);
     const { country } = useCountry();
-
-    useEffect(() => {
-        setSearchInput(query);
-    }, [query]);
 
     useEffect(() => {
         if (inputRef.current) setSearchInput(inputRef.current.value);
@@ -89,18 +81,22 @@ const SearchBar = ({
         fetchResults();
     }, [searchInput]);
 
-    return (
-        <div className='flex items-center gap-2 relative'>
+    useEffect(() => {
+        emitSearching(searching);
+    }, [searching]);
+
+    const pill = (
+        <div className='flex items-center gap-2 relative w-full'>
             <div
                 onClick={() => inputRef.current?.focus()}
-                className='bg-transparent border-b border-border relative sm:w-[600px] w-full tracking-wide font-medium rounded-none flex gap-3 items-center py-2 px-1 transition-colors focus-within:border-primary'
+                className='flex w-full items-center gap-2 rounded-full border border-border bg-secondary/80 py-1 pl-3 pr-1 tracking-wide font-medium transition-colors focus-within:border-primary hover:bg-secondary'
             >
                 <Label htmlFor='search' className='flex shrink-0 items-center pl-1 pr-1'>
                     <SearchIcon className='!size-4 text-muted-foreground' />
                 </Label>
                 <Input
                     id='search'
-                    className='focus-visible:outline-none focus-visible:ring-transparent select-none shadow-none outline-none border-none bg-transparent h-9 px-1.5 text-base md:text-lg placeholder:text-muted-foreground/70 placeholder:font-light'
+                    className='focus-visible:outline-none focus-visible:ring-transparent select-none shadow-none outline-none border-none bg-transparent h-8 px-1 text-sm placeholder:text-muted-foreground/70 placeholder:font-light'
                     ref={inputRef}
                     placeholder='Search for anything...'
                     value={searchInput}
@@ -116,7 +112,7 @@ const SearchBar = ({
                             setShowCard(false);
                             if (target.value.trim().length > 0 && !searching) {
                                 setSearching(true);
-                                onSearch(target.value.trim());
+                                emitSearch(target.value.trim());
                             }
                         }
                     }}
@@ -130,12 +126,12 @@ const SearchBar = ({
             </div>
             <Button
                 size='icon'
-                className='w-10 h-10 shrink-0 rounded-none disabled:bg-transparent disabled:text-muted-foreground/50 bg-primary text-primary-foreground hover:text-primary-foreground hover:bg-primary transition-shadow enabled:enabled:lime-lamp-strong'
+                className='size-7 shrink-0 rounded-full bg-primary text-primary-foreground hover:text-primary-foreground hover:bg-primary'
                 variant='ghost'
                 onClick={() => {
                     if (searchInput.trim().length > 0 && !searching) {
                         setSearching(true);
-                        onSearch(searchInput.trim());
+                        emitSearch(searchInput.trim());
                     }
                 }}
                 disabled={searching || !(searchInput.trim().length > 0)}
@@ -149,10 +145,15 @@ const SearchBar = ({
                 setSearching={setSearching}
                 results={results}
                 loading={loading}
-                onSearch={onSearch}
+                onSearch={(q: string) => {
+                    setSearching(true);
+                    emitSearch(q);
+                }}
             />
         </div>
     );
+
+    return pill;
 };
 
 export default SearchBar;

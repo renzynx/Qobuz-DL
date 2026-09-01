@@ -2,11 +2,9 @@
 
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import ReleaseCard from '@/components/release-card';
-import SearchBar from '@/components/search-bar/search-bar';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { QobuzSearchFilters, QobuzSearchResults } from '@/lib/qobuz-dl';
-import { APPLICATION_NAME, IS_DEFAULT_APPLICATION_NAME } from '@/lib/app-config';
 import { getApiClient } from '@/lib/api/client';
 import { filterData, filterExplicit, hasMoreResults, isStaleResponse, mergeResults, placeholderCount } from '@/lib/search/results';
 import { getTailwindBreakpoint } from '@/lib/utils';
@@ -16,6 +14,7 @@ import { useSettings } from '@/lib/settings-provider';
 import { useTheme } from 'next-themes';
 import CountryPicker from '@/components/country-picker';
 import { useCountry } from '@/lib/country-provider';
+import { onSearchEvent, onSearchingEvent } from '@/lib/search/bus';
 
 const rowsMap = {
     sm: 3,
@@ -42,6 +41,21 @@ const SearchView = () => {
     const [scrollTrigger, isInView] = useInView();
     const inFlight = useRef<AbortController | null>(null);
     const requestId = useRef(0);
+
+    // The shell's pill publishes searches on the bus; this view executes them.
+    // The handler rides a ref so the subscription binds once while `onSearch`
+    // stays live — a dependency-free effect keeps the compiler's memoization.
+    const searchHandler = useRef<(query: string) => void>(() => {});
+    searchHandler.current = (query: string) => void onSearch(query);
+
+    useEffect(() => {
+        const offQuery = onSearchEvent((query) => searchHandler.current(query));
+        const offSearching = onSearchingEvent(setSearching);
+        return () => {
+            offQuery();
+            offSearching();
+        };
+    }, []);
 
     const routeFor = useCallback(
         (field: QobuzSearchFilters) => {
@@ -175,26 +189,25 @@ const SearchView = () => {
 
     return (
         <>
-            <div className='space-y-4'>
-                <div className='flex flex-col select-none cursor-pointer items-center animate-[wordmark-in_600ms_cubic-bezier(0.22,1,0.36,1)_both]' onClick={() => {
-                    setQuery('');
-                    setResults(null);
-                    setSearchField('albums');
-                }}>
-                    {IS_DEFAULT_APPLICATION_NAME ? (
-                        <h1 className='font-serif text-[64px] leading-none md:text-[96px] tracking-tight text-foreground'>
-                            Qobuz<span className='italic'>—</span>DL
+            {!results && (
+                <section className='relative mb-8 overflow-hidden rounded-lg border border-border bg-card' aria-label='Album of the week'>
+                    <div className='flex flex-col gap-6 p-6 md:p-10'>
+                        <p className='index-numeral'>Album of the week</p>
+                        <h1 className='max-w-xl text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl'>
+                            Dug out of the crate, every Monday
                         </h1>
-                    ) : (
-                        <h1 className='font-serif text-[48px] leading-none md:text-[72px] tracking-tight text-foreground'>
-                            {APPLICATION_NAME}
-                        </h1>
-                    )}
-                    <p className='index-numeral mt-3'>A frontend browser client for downloading music for Qobuz</p>
-                </div>
-                <div className='flex flex-col items-start justify-center'>
-                    <SearchBar onSearch={onSearch} searching={searching} setSearching={setSearching} query={query} />
+                        <p className='max-w-lg text-sm leading-relaxed text-muted-foreground'>
+                            Hand-picked by the operators of this instance — the record they have had on the turntable, in hi-res.
+                        </p>
+                        <p className='index-numeral'>
+                            Start digging with the search above — every result plays here, and any release can be taken with you.
+                        </p>
+                    </div>
+                </section>
+            )}
 
+            <div className='space-y-4'>
+                <div className='flex flex-col items-start justify-center'>
                     <div className='w-full flex items-center justify-between'>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -228,7 +241,7 @@ const SearchView = () => {
 
             <div>
                 {results && (
-                    <div className='my-6 w-screen mx-auto max-w-[1600px] pb-20'>
+                    <div className='my-6 mx-auto w-full max-w-[1600px] pb-20'>
                         <div
                             className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-x-4 gap-y-8 w-full px-6 overflow-visible rail-line pl-4 md:pl-8'
                             style={{

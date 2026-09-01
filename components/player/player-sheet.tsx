@@ -58,7 +58,7 @@ const PlayerSheet = ({ open, onClose }: PlayerSheetProps) => {
             {/* The scroll region: on a short viewport the artwork and lyrics
                 scroll inside the sheet instead of pushing the transport off
                 the bottom or the header above the fold. */}
-            <div className='flex min-h-0 flex-1 flex-col items-center gap-4 overflow-y-auto'>
+            <div className='flex min-h-0 flex-1 flex-col items-center gap-4 overflow-y-auto pb-2'>
                 <div className='size-40 shrink-0 overflow-hidden border border-border/60 bg-secondary'>
                     {track.album?.image?.large ? <img src={track.album.image.large} alt={title} className='size-full object-cover' /> : null}
                 </div>
@@ -82,9 +82,9 @@ const PlayerSheet = ({ open, onClose }: PlayerSheetProps) => {
                         setScrub(null);
                         seek(values[0] ?? 0);
                     }}
-                    className='w-full shrink-0'
+                    className='w-full max-w-sm shrink-0'
                 />
-                <div className='flex shrink-0 items-center gap-2'>
+                <div className='flex shrink-0 items-center gap-2 text-foreground'>
                     <Button
                         variant='ghost'
                         size='icon'

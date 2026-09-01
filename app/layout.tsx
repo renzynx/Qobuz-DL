@@ -3,9 +3,6 @@ import MotionProvider from '@/components/motion-provider';
 import PlayerBar from '@/components/player/player-bar';
 import StatusBarContainer from '@/components/status-bar/container';
 import { ThemeProvider } from '@/components/theme-provider';
-import { Button } from '@/components/ui/button';
-import ChangelogDialog from '@/components/ui/changelog-dialog';
-import SettingsForm from '@/components/ui/settings-form';
 import { Toaster } from '@/components/ui/sonner';
 import { APPLICATION_NAME, IS_DEFAULT_APPLICATION_NAME } from '@/lib/app-config';
 import { CountryProvider } from '@/lib/country-provider';
@@ -13,19 +10,49 @@ import { FFmpegProvider } from '@/lib/ffmpeg-provider';
 import { PlayerProvider } from '@/lib/player/context';
 import { SettingsProvider } from '@/lib/settings-provider';
 import { StatusBarProvider } from '@/lib/status-bar/context';
-import { FaGithub } from '@react-icons/all-files/fa/FaGithub';
+import AppShell from '@/components/shell/app-shell';
+import HeaderActions from '@/components/shell/header-actions';
 import type { Metadata } from 'next';
 import { Geist, Instrument_Serif, JetBrains_Mono } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 
 /*
-DESIGN CONTRACT — Gallery Blackout (seed 6a1ff499): near-black exhibition void; releases hang as
-hairline plates against an off-centre rail; acid lime (#D8FF3E) is the only light source (primary
-action, focus, live states); Instrument Serif wordmark, JetBrains Mono measurements, Geist UI text;
-film-grain field replaces the particle background. FINISH: unreviewed and undocumented is
-unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping
-raster carrying its provenance.
+DESIGN CONTRACT — Crate, canon build (seed qobuz-dl-identity-2026)
+
+THESIS: A record crate you can play and empty. Crate is the only app where
+listening and taking the file with you are one gesture, so the shell carries
+player, catalogue AND transfers as equal citizens — not a downloader with a
+player bolted on. It refuses the incumbent's exhibition void (near-black plus
+one neon accent: the AI-default cluster this category always ships).
+
+OWN-WORLD: Warm drenched dark — #121212 ground, #0A0A0A nav, #181818 raised
+card, #1F1F1F hover. One live accent, lime #A3E635, spent only on the thing
+that is happening right now: the active nav row, the playing equaliser, the
+transfer in flight. Album art is the only saturated color; chrome stays warm
+and near-neutral. Geist UI at 13-14px, instrument-serif nowhere, mono reserved
+for timings and counts. 8px radius on controls, 4px on rows, square art.
+
+STORY: Visitor lands on Home — a Bandcamp-style weekly album spotlight, then
+their recent crates. Searches; results fill the main column as a dense art
+grid. Plays: the dock wakes. Downloads: the action flips to state
+(HyperCard's discipline), the sidebar Transfers row counts up (split-flap's
+row-level live update, never a modal), and the file lands.
+
+FIRST VIEWPORT (1440x900): 224px nav left — wordmark, Search/Home/Transfers,
+then "Your Crate" playlists; translucent topbar with a single search pill;
+main column opens on a full-bleed weekly album spotlight with its Download
+control, then a "Recently played" art grid; player dock pinned across the
+bottom, art + title left, transport centre, transfers count right.
+
+FORM: User-pinned canon (Spotify + Tidal + Bandcamp) — a brief-pinned
+decision beats the roll, so the canon is executed at full fidelity with the
+three declined challengers' disciplines raised into it: split-flap row-level
+live update, orienteering fixed-legend nav, HyperCard's action-flips-to-state.
+
+FINISH: unreviewed and undocumented is unfinished; this build ends with the
+finish review, the verdict, DESIGN.md, and every shipping raster carrying its
+provenance.
 */
 
 const geist = Geist({
@@ -60,6 +87,10 @@ export const metadata: Metadata = {
     keywords: [APPLICATION_NAME, 'music', 'downloader', 'hi-res', 'qobuz', 'flac', 'alac', 'mp3', 'aac', 'opus', 'wav', 'qobuz download']
 };
 
+/**
+ * Settings, changelog and the repo link render through the client component
+ * `components/shell/header-actions.tsx`, portalled into the shell topbar.
+ */
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
         <html lang='en' className='dark' suppressHydrationWarning>
@@ -72,23 +103,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                                     <SettingsProvider>
                                         <ThemeProvider attribute='class' defaultTheme='dark' enableSystem>
                                             <GrainField />
-                                            <div className='fixed justify-between items-start flex w-full max-w-screen p-4 z-[10]'>
-                                                <div className='flex flex-col gap-2'>
-                                                    <SettingsForm />
-                                                    <ChangelogDialog />
-                                                </div>
-                                                <div className='flex gap-2 items-center'>
-                                                    <a href='https://github.com/d0nj/Qobuz-DL' target='_blank' rel='noopener noreferrer'>
-                                                        <Button variant='ghost' size='icon'>
-                                                            <FaGithub />
-                                                        </Button>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                            <div className='flex flex-col min-h-dvh'>
-                                                <main className='px-6 pt-28 md:pt-24 2xl:pt-40 flex-1 flex flex-col items-center justify-center gap-2 z-[2] overflow-x-hidden max-w-screen overflow-y-hidden'>
+                                            <div className='flex min-h-dvh flex-col'>
+                                                <AppShell>
                                                     {children}
-                                                </main>
+                                                    {/* Topbar actions render into the shell's reserved slot, so the
+                                                        header stays a single translucent band over the content. */}
+                                                    <HeaderActions />
+                                                </AppShell>
                                                 {/* One dock owns the page floor: the download strip and
                                                     the player plate are rows of the same unit, never two
                                                     floating bands stacked over each other. */}

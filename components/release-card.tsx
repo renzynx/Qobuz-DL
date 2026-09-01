@@ -2,7 +2,7 @@ import ArtistDialog from './artist-dialog';
 import DownloadAlbumButton from './download-album-button';
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
-import { AlignJustifyIcon, DiscAlbumIcon, DotIcon, DownloadIcon, ListPlusIcon, ListStartIcon, PlayIcon, UsersIcon } from 'lucide-react';
+import { AlignJustifyIcon, DiscAlbumIcon, DownloadIcon, ListPlusIcon, ListStartIcon, PlayIcon, UsersIcon } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { download } from '@/lib/download-job';
@@ -102,32 +102,13 @@ const ReleaseCard = ({
                     }}
                 >
                     <div className='flex flex-col h-full justify-between'>
-                        <div className='space-y-0.5 p-4 flex justify-between relative overflow-x-hidden pointer-events-auto'>
+                        <div className='space-y-0.5 p-3 flex justify-between relative overflow-x-hidden pointer-events-auto'>
                             <div className='w-full pr-9'>
-                                <p className='text-[11px] truncate font-mono uppercase tracking-[0.14em] text-foreground/90'>
-                                    {item.isArtist ? (result as QobuzArtist).albums_count + ' Releases' : album!.genre.name}
-                                </p>
-                                {!item.isArtist && (
-                                    <p className='text-xs truncate font-mono text-muted-foreground'>{item.releasedYear}</p>
+                                {!item.isArtist && (item.bitDepth ?? 0) >= 24 && (
+                                    <span className='rounded-sm bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary-foreground'>
+                                        Hi-Res
+                                    </span>
                                 )}
-                                {!item.isArtist && (
-                                    <div className='flex text-[10px] truncate font-semibold items-center justify-start'>
-                                        <p>{item.bitDepth}-bit</p>
-                                        <DotIcon size={16} />
-                                        <p>{item.samplingRate} kHz</p>
-                                    </div>
-                                )}
-                                <div className='flex text-[10px] truncate font-semibold items-center justify-start'>
-                                    {item.tracksCount ? (
-                                        <>
-                                            <p>
-                                                {item.tracksCount} {item.tracksCount > 1 ? 'tracks' : 'track'}
-                                            </p>
-                                            <DotIcon size={16} />
-                                        </>
-                                    ) : null}
-                                    {!item.isArtist && <p>{formatDuration(item.duration ?? 0)}</p>}
-                                </div>
                             </div>
                             {!item.isArtist && showArtistDialog && (
                                 <div className='absolute top-0 right-0 p-4 pointer-events-auto'>
