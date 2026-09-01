@@ -59,6 +59,28 @@ describe('LyricsView', () => {
         expect(scrollIntoView).toHaveBeenCalled();
     });
 
+    it('centres the active line rather than nudging it to the nearest edge', async () => {
+        // `nearest` leaves the current line wherever it already is — at the
+        // bottom edge on the way down — so the reader watches the last line
+        // instead of the one being sung. `center` is what makes the block
+        // read as karaoke rather than a log.
+        render(<LyricsView syncedLyrics={lyrics} position={6} />);
+        await act(async () => {
+            await new Promise((r) => setTimeout(r, 0));
+        });
+
+        expect(scrollIntoView).toHaveBeenCalledWith(expect.objectContaining({ block: 'center', behavior: 'smooth' }));
+    });
+
+    it('centres the lyric text inside its container', () => {
+        const { container, unmount } = render(<LyricsView syncedLyrics={lyrics} position={6} />);
+        expect(container.querySelector('[data-current="true"]')!.className).toContain('text-center');
+        unmount();
+
+        const plain = render(<LyricsView plain={'one\ntwo'} position={0} />);
+        expect(plain.container.querySelector('span')!.className).toContain('text-center');
+    });
+
     it('does not scroll again while the highlighted line is unchanged', async () => {
         const { rerender } = render(<LyricsView syncedLyrics={lyrics} position={6} />);
         await act(async () => {

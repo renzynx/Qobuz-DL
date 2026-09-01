@@ -15,8 +15,7 @@ export type PlayerQueue = { tracks: PlayerTrack[]; current: number };
 const albumIdOf = (track: QobuzTrack): QobuzAlbum['id'] => track.album?.id ?? '';
 
 /** Streamable is a Qobuz rights flag; the download path filters on it already. */
-const fromAlbum = (album: FetchedQobuzAlbum): PlayerTrack[] =>
-    album.tracks.items.filter((t) => t.streamable).map((track) => ({ track, albumId: album.id }));
+const fromAlbum = (album: FetchedQobuzAlbum): PlayerTrack[] => album.tracks.items.filter((t) => t.streamable).map((track) => ({ track, albumId: album.id }));
 
 export function startAlbum(album: FetchedQobuzAlbum, startIndex: number): PlayerQueue {
     const tracks = fromAlbum(album);
@@ -27,8 +26,17 @@ export function startAlbum(album: FetchedQobuzAlbum, startIndex: number): Player
     return { tracks, current: current === -1 ? 0 : current };
 }
 
-export function startSingle(track: QobuzTrack): PlayerQueue {
-    return { tracks: [{ track, albumId: albumIdOf(track) }], current: 0 };
+export function startSingle(track: QobuzTrack, album?: FetchedQobuzAlbum | null): PlayerQueue {
+    /**
+     * Backfills album context a search result omitted.
+     *
+     * The search endpoint returns tracks with `album` reduced to a title and
+     * an id — no `image`. The album endpoint always carries it. Without this,
+     * a track played straight from search renders an empty art box.
+     */
+    const withAlbumContext = (t: QobuzTrack): QobuzTrack =>
+        t.album?.image?.small ? t : { ...t, album: { ...(t.album ?? ({} as QobuzAlbum)), ...(album as unknown as QobuzAlbum) } };
+    return { tracks: [{ track: album ? withAlbumContext(track) : track, albumId: albumIdOf(track) }], current: 0 };
 }
 
 export function playNext(queue: PlayerQueue, track: QobuzTrack): PlayerQueue {

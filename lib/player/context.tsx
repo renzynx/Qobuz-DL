@@ -144,34 +144,31 @@ function usePlayerValue(): { audioRef: React.RefObject<HTMLAudioElement | null>;
         setState((prev) => ({ ...prev, queue }));
     }, []);
 
-    const playTrack = useCallback(
-        async (loaded: LoadedTrack, position: number) => {
-            const audio = audioRef.current;
-            if (!audio) return;
-            audio.src = loaded.url;
-            audio.currentTime = position;
-            setPosition(position);
-            setState((prev) => ({ ...prev, playing: true, position, duration: loaded.track.duration ?? 0 }));
-            try {
-                await audio.play();
-            } catch {
-                // Autoplay can be refused before a user gesture; the element is
-                // loaded either way, so the failure is not worth surfacing.
-                setState((prev) => ({ ...prev, playing: false }));
-            }
-            publishMetadata(loaded.track);
-            // A lookup still in flight when the track changed must not land
-            // afterwards onto the new track's lyrics; the ref holds the track
-            // the provider last committed to, so a stale answer is dropped.
-            lyricsTrackIdRef.current = loaded.track.id;
-            void fetchLyrics(loaded.track).then((lyrics) => {
-                if (lyricsTrackIdRef.current !== loaded.track.id) return;
-                setSyncedLyrics(lyrics?.synced ?? null);
-                setPlainLyrics(lyrics?.plain ?? null);
-            });
-        },
-        []
-    );
+    const playTrack = useCallback(async (loaded: LoadedTrack, position: number) => {
+        const audio = audioRef.current;
+        if (!audio) return;
+        audio.src = loaded.url;
+        audio.currentTime = position;
+        setPosition(position);
+        setState((prev) => ({ ...prev, playing: true, position, duration: loaded.track.duration ?? 0 }));
+        try {
+            await audio.play();
+        } catch {
+            // Autoplay can be refused before a user gesture; the element is
+            // loaded either way, so the failure is not worth surfacing.
+            setState((prev) => ({ ...prev, playing: false }));
+        }
+        publishMetadata(loaded.track);
+        // A lookup still in flight when the track changed must not land
+        // afterwards onto the new track's lyrics; the ref holds the track
+        // the provider last committed to, so a stale answer is dropped.
+        lyricsTrackIdRef.current = loaded.track.id;
+        void fetchLyrics(loaded.track).then((lyrics) => {
+            if (lyricsTrackIdRef.current !== loaded.track.id) return;
+            setSyncedLyrics(lyrics?.synced ?? null);
+            setPlainLyrics(lyrics?.plain ?? null);
+        });
+    }, []);
 
     /**
      * Loads the track at `index` in the current queue, advancing past tracks
@@ -233,22 +230,19 @@ function usePlayerValue(): { audioRef: React.RefObject<HTMLAudioElement | null>;
      * Resolves the next track's URL while the current one plays, so `ended`
      * does not wait on a round trip — several seconds on hi-res tracks.
      */
-    const prefetch = useCallback(
-        async (index: number) => {
-            const queue = queueRef.current;
-            const target = queue?.tracks[index];
-            if (!target || urlCache.current.has(target.track.id)) return;
-            try {
-                const url = await fetchStreamUrl(target.track.id, countryRef.current);
-                if (abortRef.current?.signal.aborted) return;
-                urlCache.current.set(target.track.id, url);
-            } catch {
-                // A prefetch miss costs nothing up front; loadAt reports it if
-                // that track is ever reached.
-            }
-        },
-        []
-    );
+    const prefetch = useCallback(async (index: number) => {
+        const queue = queueRef.current;
+        const target = queue?.tracks[index];
+        if (!target || urlCache.current.has(target.track.id)) return;
+        try {
+            const url = await fetchStreamUrl(target.track.id, countryRef.current);
+            if (abortRef.current?.signal.aborted) return;
+            urlCache.current.set(target.track.id, url);
+        } catch {
+            // A prefetch miss costs nothing up front; loadAt reports it if
+            // that track is ever reached.
+        }
+    }, []);
 
     /** Moves the queue to `next` and loads whatever lands under the cursor. */
     const moveTo = useCallback(
@@ -267,9 +261,10 @@ function usePlayerValue(): { audioRef: React.RefObject<HTMLAudioElement | null>;
             const generation = ++playGenerationRef.current;
             const albumId = track.album?.id;
             let queue: PlayerQueue | null = null;
+            let album: FetchedQobuzAlbum | null = null;
             if (albumId) {
                 const cached = albumCache.current.get(albumId) ?? null;
-                const album = cached ?? (await fetchAlbum(albumId, countryRef.current).catch(() => null));
+                album = cached ?? (await fetchAlbum(albumId, countryRef.current).catch(() => null));
                 if (generation !== playGenerationRef.current) return;
                 if (album) {
                     albumCache.current.set(albumId, album);
@@ -277,7 +272,7 @@ function usePlayerValue(): { audioRef: React.RefObject<HTMLAudioElement | null>;
                     queue = startAlbum(album, index === -1 ? 0 : index);
                 }
             }
-            setQueue(queue ?? startSingle(track));
+            setQueue(queue ?? startSingle(track, album ?? null));
             await loadAt(queue?.current ?? 0);
         },
         [setQueue, loadAt]

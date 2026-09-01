@@ -22,7 +22,7 @@ const StatusBar = () => {
     return (
         <>
             <AnimatePresence>
-                {statusBar.open && (
+                {(statusBar.open || statusBar.processing) && (
                     <motion.div
                         key='progress'
                         className='w-full z-[20] absolute bottom-0 left-0 pointer-events-auto'

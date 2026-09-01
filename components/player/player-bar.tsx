@@ -9,15 +9,11 @@ import { usePlayer } from '@/lib/player/context';
 import { formatArtists, formatTitle } from '@/lib/qobuz-dl';
 
 /**
- * The bottom row of the app shell: the `min-h-dvh` column in the layout ends
- * with the download status zone and then this bar, so the dock sits in flow at
- * the page floor — nothing floats over the gallery, nothing is stacked on the
- * content. The expanded sheet grows the same column above the bar.
- *
- * `sticky bottom-0` keeps it pinned to the viewport bottom while the page is
- * taller than the screen, without ever leaving the flow: when the user reaches
- * the end of the document the bar is simply the last thing there, not a
- * floating panel covering the last row of results.
+ * The player plate — the bottom row of the app's floor dock. The layout
+ * wraps it and the download strip in one `sticky bottom-0` dock, so the
+ * two travel together: when a download runs, its strip sits above the
+ * player as a row of the same unit rather than a separate band floating
+ * over the queue. The expanded sheet grows the dock upward.
  *
  * The bar is a view over `usePlayer()` and owns nothing: it renders the
  * current track, forwards transport intents straight to the context, and
@@ -40,7 +36,7 @@ const PlayerBar = () => {
     const artist = formatArtists(track);
 
     return (
-        <div className='pointer-events-none sticky bottom-0 z-[30] mx-auto flex w-full max-w-screen flex-col gap-2 px-4 pb-4'>
+        <div className='pointer-events-none mx-auto flex w-full max-w-screen flex-col gap-2 px-4 pb-4 pt-3'>
             <PlayerSheet open={expanded} onClose={() => setExpanded(false)} />
             <motion.div
                 data-testid='player-bar'

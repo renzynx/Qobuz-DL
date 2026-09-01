@@ -2,10 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { addToQueue, playNext, previous, skip, startAlbum, startSingle } from '@/lib/player/player';
 import type { FetchedQobuzAlbum, QobuzTrack } from '@/lib/qobuz-dl';
 
-const track = (id: number, streamable = true): QobuzTrack =>
-    ({ id, title: `t${id}`, streamable, track_number: id, media_number: 1 } as unknown as QobuzTrack);
+const track = (id: number, streamable = true): QobuzTrack => ({ id, title: `t${id}`, streamable, track_number: id, media_number: 1 }) as unknown as QobuzTrack;
 
-const album = (...tracks: QobuzTrack[]): FetchedQobuzAlbum => ({ id: '10', tracks: { items: tracks } } as unknown as FetchedQobuzAlbum);
+const album = (...tracks: QobuzTrack[]): FetchedQobuzAlbum => ({ id: '10', tracks: { items: tracks } }) as unknown as FetchedQobuzAlbum;
 
 describe('player queue', () => {
     it('loads a streamable album starting at the tapped index', () => {
@@ -26,6 +25,25 @@ describe('player queue', () => {
     it('falls back to index 0 when the tapped track is not streamable', () => {
         const queue = startAlbum(album(track(1, false), track(2)), 1);
         expect(queue.current).toBe(0);
+    });
+
+    it('backfills album artwork onto a single track that arrived without it', () => {
+        // The search endpoint returns tracks whose `album` has no `image`, so
+        // a track played straight from search rendered an empty art box. The
+        // album fetched for the queue carries the artwork and must be merged
+        // in rather than dropped on the one-track fallback.
+        const bare = { id: 7, title: 'solo', streamable: true, album: { id: '10', title: 'Album' } } as unknown as QobuzTrack;
+        const withArt = { ...album(track(7)), image: { small: 's.jpg', large: 'l.jpg' } } as unknown as FetchedQobuzAlbum;
+
+        const queue = startSingle(bare, withArt);
+        expect(queue.tracks[0].track.album?.image?.small).toBe('s.jpg');
+        expect(queue.tracks[0].track.album?.title).toBe('Album');
+    });
+
+    it('keeps artwork the track already had instead of overwriting it', () => {
+        const withArt = { id: 8, title: 'arted', streamable: true, album: { id: '10', image: { small: 'own.jpg' } } } as unknown as QobuzTrack;
+        const queue = startSingle(withArt, { id: '10', image: { small: 'other.jpg' } } as unknown as FetchedQobuzAlbum);
+        expect(queue.tracks[0].track.album?.image?.small).toBe('own.jpg');
     });
 
     it('inserts play-next right after the current track', () => {
@@ -62,7 +80,13 @@ describe('player queue', () => {
     });
 
     it('skips forward and stops at the end', () => {
-        const queue = skip({ tracks: [{ track: track(1), albumId: '10' }, { track: track(2), albumId: '10' }], current: 1 });
+        const queue = skip({
+            tracks: [
+                { track: track(1), albumId: '10' },
+                { track: track(2), albumId: '10' }
+            ],
+            current: 1
+        });
         expect(queue.current).toBe(1);
     });
 

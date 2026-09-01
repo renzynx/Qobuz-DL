@@ -89,8 +89,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                                                 <main className='px-6 pt-28 md:pt-24 2xl:pt-40 flex-1 flex flex-col items-center justify-center gap-2 z-[2] overflow-x-hidden max-w-screen overflow-y-hidden'>
                                                     {children}
                                                 </main>
-                                                <StatusBarContainer />
-                                                <PlayerBar />
+                                                {/* One dock owns the page floor: the download strip and
+                                                    the player plate are rows of the same unit, never two
+                                                    floating bands stacked over each other. */}
+                                                <div className='sticky bottom-0 z-[30] w-full border-t border-border bg-background'>
+                                                    <StatusBarContainer />
+                                                    <PlayerBar />
+                                                </div>
                                                 <Toaster closeButton richColors />
                                             </div>
                                         </ThemeProvider>

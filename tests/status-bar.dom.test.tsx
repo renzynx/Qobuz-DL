@@ -3,6 +3,7 @@ import { act, render } from '@testing-library/react';
 import { ActivityIcon } from 'lucide-react';
 import { StatusBarProvider, useStatusBar } from '@/lib/status-bar/context';
 import { createJob, getActiveQueue } from '@/lib/status-bar/jobs';
+import StatusBarContainer from '@/components/status-bar/container';
 
 const settle = () => new Promise((r) => setTimeout(r, 0));
 
@@ -75,5 +76,37 @@ describe('completion hold', () => {
         } finally {
             vi.useRealTimers();
         }
+    });
+});
+
+describe('status bar container gate', () => {
+    it('shows the zone while a job is processing even when the bar was collapsed', async () => {
+        // The user collapsed the bar during an earlier download
+        // (openPreference=false). A new download must still be visible — the
+        // zone gated on `open` alone rendered nothing for the whole job.
+        const captured: { setStatusBar?: ReturnType<typeof useStatusBar>['setStatusBar'] } = {};
+        const Probe = () => {
+            captured.setStatusBar = useStatusBar().setStatusBar;
+            return null;
+        };
+
+        render(
+            <StatusBarProvider>
+                <StatusBarContainer />
+                <Probe />
+            </StatusBarProvider>
+        );
+
+        expect(document.querySelector('[data-testid="download-zone"]')).toBeNull();
+
+        await act(async () => {
+            captured.setStatusBar!((prev) => ({ ...prev, processing: true, open: false, progress: 40 }));
+            await settle();
+        });
+
+        // The zone is the top row of the floor dock; the player plate renders
+        // beneath it inside the same dock (layout.tsx), so "processing means
+        // visible" is what this pins.
+        expect(document.querySelector('[data-testid="download-zone"]')).not.toBeNull();
     });
 });

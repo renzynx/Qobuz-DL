@@ -32,9 +32,11 @@ const LyricsView = ({ syncedLyrics, plain, position }: LyricsViewProps) => {
     const currentRef = useRef<HTMLElement | null>(null);
 
     useEffect(() => {
-        // `nearest` (not `center`) keeps the first and last lines from
-        // scrolling to spurious whitespace at the container's edges.
-        currentRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        // `center`, not `nearest`: `nearest` only scrolls when the line is
+        // already out of view, so the active line drifts to the bottom edge
+        // and the reader ends up watching the last line rather than the one
+        // being sung. Centring keeps the eye in one place.
+        currentRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
     }, [currentIndex]);
 
     if (syncedLyrics) {
@@ -43,9 +45,15 @@ const LyricsView = ({ syncedLyrics, plain, position }: LyricsViewProps) => {
                 {syncedLyrics.map((line, index) => (
                     <span
                         key={`${line.time}-${line.line}`}
-                        ref={index === currentIndex ? (node) => { currentRef.current = node; } : null}
+                        ref={
+                            index === currentIndex
+                                ? (node) => {
+                                      currentRef.current = node;
+                                  }
+                                : null
+                        }
                         data-current={index === currentIndex ? 'true' : 'false'}
-                        className={`text-sm ${index === currentIndex ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}
+                        className={`text-center text-sm ${index === currentIndex ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}
                     >
                         {line.line}
                     </span>
@@ -59,7 +67,7 @@ const LyricsView = ({ syncedLyrics, plain, position }: LyricsViewProps) => {
     return (
         <div className='flex max-h-64 flex-col gap-2 overflow-y-auto py-2'>
             {plain.split('\n').map((line, index) => (
-                <span key={`${index}-${line}`} className='text-sm text-muted-foreground'>
+                <span key={`${index}-${line}`} className='text-center text-sm text-muted-foreground'>
                     {line}
                 </span>
             ))}
