@@ -40,7 +40,7 @@ const PlayerBar = () => {
     const artist = formatArtists(track);
 
     return (
-        <div className='pointer-events-none sticky bottom-0 mx-auto flex w-full max-w-screen flex-col gap-2 px-4 pb-4'>
+        <div className='pointer-events-none sticky bottom-0 z-[30] mx-auto flex w-full max-w-screen flex-col gap-2 px-4 pb-4'>
             <PlayerSheet open={expanded} onClose={() => setExpanded(false)} />
             <motion.div
                 data-testid='player-bar'
