@@ -27,15 +27,37 @@ describe('player queue', () => {
         expect(queue.current).toBe(0);
     });
 
-    it('backfills album artwork onto a single track that arrived without it', () => {
-        // The search endpoint returns tracks whose `album` has no `image`, so
-        // a track played straight from search rendered an empty art box. The
-        // album fetched for the queue carries the artwork and must be merged
-        // in rather than dropped on the one-track fallback.
-        const bare = { id: 7, title: 'solo', streamable: true, album: { id: '10', title: 'Album' } } as unknown as QobuzTrack;
-        const withArt = { ...album(track(7)), image: { small: 's.jpg', large: 'l.jpg' } } as unknown as FetchedQobuzAlbum;
+    // `album/get` returns `tracks.items[].album` as an EMPTY object while the
+    // album itself carries `image` at the top level. Confirmed against the live
+    // API: playing any track produced a queue with no artwork at all, so the
+    // bar rendered an empty box. `search` is the opposite — it ships
+    // `album.image` per track. The merge must keep whichever side has data.
+    it('gives album tracks the album artwork the endpoint omitted', () => {
+        const albumOnly = { ...album(track(1), track(2)), image: { small: 'cover.jpg', large: 'cover-lg.jpg' } } as unknown as FetchedQobuzAlbum;
 
-        const queue = startSingle(bare, withArt);
+        const queue = startAlbum(albumOnly, 0);
+        expect(queue.tracks[0].track.album?.image?.small).toBe('cover.jpg');
+        expect(queue.tracks[1].track.album?.image?.small).toBe('cover.jpg');
+        // The track's own identity survives the merge.
+        expect(queue.tracks.map((t) => t.track.id)).toEqual([1, 2]);
+    });
+
+    it('keeps the artwork a track already carries', () => {
+        // A track that arrived from search, where `album.image` IS populated.
+        const withArt = {
+            id: 3,
+            title: 'searchy',
+            streamable: true,
+            album: { id: '10', title: 'Search Album', image: { small: 'own.jpg' } }
+        } as unknown as QobuzTrack;
+        const queue = startAlbum({ ...album(withArt), image: { small: 'album.jpg' } } as unknown as FetchedQobuzAlbum, 0);
+        expect(queue.tracks[0].track.album?.image?.small).toBe('own.jpg');
+        expect(queue.tracks[0].track.album?.title).toBe('Search Album');
+    });
+
+    it('gives a single track the album artwork too', () => {
+        const bare = { id: 7, title: 'solo', streamable: true, album: {} } as unknown as QobuzTrack;
+        const queue = startSingle(bare, { id: '10', title: 'Album', image: { small: 's.jpg' } } as unknown as FetchedQobuzAlbum);
         expect(queue.tracks[0].track.album?.image?.small).toBe('s.jpg');
         expect(queue.tracks[0].track.album?.title).toBe('Album');
     });

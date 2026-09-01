@@ -14,8 +14,22 @@ export type PlayerQueue = { tracks: PlayerTrack[]; current: number };
  */
 const albumIdOf = (track: QobuzTrack): QobuzAlbum['id'] => track.album?.id ?? '';
 
+/**
+ * Attaches the album's own context to one of its tracks.
+ *
+ * `album/get` returns `tracks.items[].album` as an EMPTY object — no image,
+ * no title — while the album itself carries `image` at the top level. Playing
+ * any track therefore produced a queue with no artwork, and the bar rendered
+ * an empty box. `search` is the opposite: it ships `album.image` per track and
+ * needs nothing. Merging keeps whichever side actually has the data, and the
+ * download path already does the same (`album: fetchedAlbumData`).
+ */
+const withAlbumContext = (track: QobuzTrack, album: FetchedQobuzAlbum): QobuzTrack =>
+    track.album?.image?.small ? track : ({ ...track, album: { ...(track.album ?? ({} as QobuzAlbum)), ...(album as unknown as QobuzAlbum) } } as QobuzTrack);
+
 /** Streamable is a Qobuz rights flag; the download path filters on it already. */
-const fromAlbum = (album: FetchedQobuzAlbum): PlayerTrack[] => album.tracks.items.filter((t) => t.streamable).map((track) => ({ track, albumId: album.id }));
+const fromAlbum = (album: FetchedQobuzAlbum): PlayerTrack[] =>
+    album.tracks.items.filter((t) => t.streamable).map((track) => ({ track: withAlbumContext(track, album), albumId: album.id }));
 
 export function startAlbum(album: FetchedQobuzAlbum, startIndex: number): PlayerQueue {
     const tracks = fromAlbum(album);
@@ -27,16 +41,8 @@ export function startAlbum(album: FetchedQobuzAlbum, startIndex: number): Player
 }
 
 export function startSingle(track: QobuzTrack, album?: FetchedQobuzAlbum | null): PlayerQueue {
-    /**
-     * Backfills album context a search result omitted.
-     *
-     * The search endpoint returns tracks with `album` reduced to a title and
-     * an id — no `image`. The album endpoint always carries it. Without this,
-     * a track played straight from search renders an empty art box.
-     */
-    const withAlbumContext = (t: QobuzTrack): QobuzTrack =>
-        t.album?.image?.small ? t : { ...t, album: { ...(t.album ?? ({} as QobuzAlbum)), ...(album as unknown as QobuzAlbum) } };
-    return { tracks: [{ track: album ? withAlbumContext(track) : track, albumId: albumIdOf(track) }], current: 0 };
+    const trackWithContext = album ? withAlbumContext(track, album) : track;
+    return { tracks: [{ track: trackWithContext, albumId: albumIdOf(trackWithContext) }], current: 0 };
 }
 
 export function playNext(queue: PlayerQueue, track: QobuzTrack): PlayerQueue {
