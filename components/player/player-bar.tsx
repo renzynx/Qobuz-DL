@@ -9,13 +9,16 @@ import { usePlayer } from '@/lib/player/context';
 import { formatArtists, formatTitle } from '@/lib/qobuz-dl';
 
 /**
- * Offset above the status bar. `StatusBarContainer` is `fixed bottom-0` and
- * ~156px tall, so the player stacks clear of it rather than inside it — the
- * two are mounted separately and never share a layout parent.
- */
-const ABOVE_STATUS_BAR = 'bottom-[7.5rem]';
-
-/**
+ * The bottom row of the app shell: the `min-h-dvh` column in the layout ends
+ * with the download status zone and then this bar, so the dock sits in flow at
+ * the page floor — nothing floats over the gallery, nothing is stacked on the
+ * content. The expanded sheet grows the same column above the bar.
+ *
+ * `sticky bottom-0` keeps it pinned to the viewport bottom while the page is
+ * taller than the screen, without ever leaving the flow: when the user reaches
+ * the end of the document the bar is simply the last thing there, not a
+ * floating panel covering the last row of results.
+ *
  * The bar is a view over `usePlayer()` and owns nothing: it renders the
  * current track, forwards transport intents straight to the context, and
  * holds only the local flag for whether the expanded sheet is open.
@@ -37,7 +40,7 @@ const PlayerBar = () => {
     const artist = formatArtists(track);
 
     return (
-        <div className={`pointer-events-none fixed inset-x-0 ${ABOVE_STATUS_BAR} z-[30] mx-auto flex w-full max-w-screen flex-col gap-2 px-4`}>
+        <div className='pointer-events-none sticky bottom-0 mx-auto flex w-full max-w-screen flex-col gap-2 px-4 pb-4'>
             <PlayerSheet open={expanded} onClose={() => setExpanded(false)} />
             <motion.div
                 data-testid='player-bar'
@@ -54,7 +57,7 @@ const PlayerBar = () => {
                     event.preventDefault();
                     setExpanded((open) => !open);
                 }}
-                className='pointer-events-auto container flex cursor-pointer items-center gap-3 border border-border bg-card/95 p-2 shadow-lg backdrop-blur'
+                className={`pointer-events-auto container flex cursor-pointer items-center gap-3 border border-border bg-card p-2${state.playing ? ' lime-lamp' : ''}`}
             >
                 <div className='relative size-11 shrink-0 overflow-hidden border border-border/60 bg-secondary'>
                     {track.album?.image?.small ? <img src={track.album.image.small} alt={title} className='size-full object-cover' /> : null}
@@ -73,7 +76,7 @@ const PlayerBar = () => {
                         size='icon'
                         aria-label={state.playing ? 'Pause' : 'Play'}
                         title={state.playing ? 'Pause' : 'Play'}
-                        className='touch-manipulation active:scale-95 transition-transform'
+                        className={`touch-manipulation active:scale-95 transition-transform${state.playing ? ' text-primary' : ''}`}
                         onClick={(event) => {
                             // The bar behind these buttons expands on tap; a
                             // transport control must not also navigate.

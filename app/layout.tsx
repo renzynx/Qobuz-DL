@@ -85,13 +85,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                                                     </a>
                                                 </div>
                                             </div>
-                                            <div className='flex flex-col min-h-screen'>
-                                                <main className='px-6 pb-12 pt-28 md:pt-24 2xl:pt-40 min-h-full flex-1 flex flex-col items-center justify-center gap-2 z-[2] overflow-x-hidden max-w-screen overflow-y-hidden'>
+                                            <div className='flex flex-col min-h-dvh'>
+                                                <main className='px-6 pt-28 md:pt-24 2xl:pt-40 flex-1 flex flex-col items-center justify-center gap-2 z-[2] overflow-x-hidden max-w-screen overflow-y-hidden'>
                                                     {children}
                                                 </main>
+                                                <StatusBarContainer />
                                                 <PlayerBar />
                                                 <Toaster closeButton richColors />
-                                                <StatusBarContainer />
                                             </div>
                                         </ThemeProvider>
                                     </SettingsProvider>

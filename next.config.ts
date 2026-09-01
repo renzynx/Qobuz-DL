@@ -24,11 +24,14 @@ const nextConfig: NextConfig = {
                     {
                         key: 'Cross-Origin-Opener-Policy',
                         value: 'same-origin'
-                    },
-                    {
-                        key: 'Cross-Origin-Embedder-Policy',
-                        value: 'require-corp'
                     }
+                    /*
+                     * No Cross-Origin-Embedder-Policy: require-corp blocked the
+                     * Qobuz CDN artwork and the akamaized stream hosts (neither
+                     * sends CORP), so the player's <audio> and album art could
+                     * never load in a real browser. ffmpeg.wasm 0.9.7 is
+                     * single-threaded and needs no cross-origin isolation.
+                     */
                 ]
             }
         ];

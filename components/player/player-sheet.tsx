@@ -39,7 +39,7 @@ const PlayerSheet = ({ open, onClose }: PlayerSheetProps) => {
             animate={{ y: 0, opacity: 1 }}
             role='dialog'
             aria-label={`Now playing ${title} by ${artist}`}
-            className='pointer-events-auto container flex flex-col gap-4 border border-border bg-card/95 p-4 shadow-lg backdrop-blur'
+            className='pointer-events-auto container flex flex-col gap-4 border border-border bg-card p-4'
         >
             <div className='flex items-start justify-between'>
                 <p className='index-numeral text-muted-foreground'>Now playing</p>
@@ -56,9 +56,7 @@ const PlayerSheet = ({ open, onClose }: PlayerSheetProps) => {
             </div>
             <div className='flex flex-col items-center gap-4'>
                 <div className='size-40 overflow-hidden border border-border/60 bg-secondary'>
-                    {track.album?.image?.large ? (
-                        <img src={track.album.image.large} alt={title} className='size-full object-cover' />
-                    ) : null}
+                    {track.album?.image?.large ? <img src={track.album.image.large} alt={title} className='size-full object-cover' /> : null}
                 </div>
                 <div className='flex min-w-0 flex-col items-center'>
                     <p className='truncate text-sm font-medium text-foreground' title={title}>
