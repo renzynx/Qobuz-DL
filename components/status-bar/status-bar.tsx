@@ -31,7 +31,7 @@ const StatusBar = () => {
                         transition={{ type: 'spring' }}
                         exit={{ y: 100, opacity: 0 }}
                     >
-                        <Card className='rounded-none border-border shadow-lg'>
+                        <Card className='flap rounded-none border-border'>
                             <CardHeader className='flex items-center flex-row justify-between transition-[height] pt-4 overflow-hidden pb-2'>
                                 <Button
                                     variant='ghost'
@@ -44,7 +44,7 @@ const StatusBar = () => {
                                 </Button>
                                 <div className='flex flex-col justify-center text-center items-center overflow-x-hidden px-2'>
                                     <motion.div layout='position' className='flex min-w-0 flex-col'>
-                                        <CardTitle className='text-nowrap max-w-full truncate p-1'>{statusBar.title || 'No items in the queue'}</CardTitle>
+                                        <CardTitle className='caps-cell text-nowrap max-w-full truncate p-1'>{statusBar.title || 'No items in the queue'}</CardTitle>
                                         <AnimatePresence>
                                             {statusBar.complete && (
                                                 <motion.p

@@ -58,7 +58,7 @@ const RecentlyDug = () => {
                         key={entry}
                         type='button'
                         onClick={() => emitSearch(entry)}
-                        className='rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent'
+                        className='flap caps-cell px-3 py-2 text-sm text-foreground transition-colors hover:text-primary'
                     >
                         {entry}
                     </button>
@@ -273,22 +273,17 @@ const SearchView = () => {
                 {results && (
                     <div className='my-6 mx-auto w-full max-w-[1600px] pb-20'>
                         <div
-                            className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-x-4 gap-y-8 w-full px-6 overflow-visible rail-line pl-4 md:pl-8'
+                            className='board-rule grid w-full grid-cols-2 gap-x-4 gap-y-6 px-2 py-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7'
                             style={{
                                 maxHeight: `${(Math.ceil(items.length / (numRows || 1)) + 2) * (cardHeight + 16)}px`
                             }}
                         >
                             {items.map((result, index) => (
-                                <div
-                                    key={`${index}-${result.id}-${searchField}`}
-                                    className='plate-hang'
-                                    style={{ animationDelay: `${Math.min(index, 14) * 35}ms` }}
-                                >
+                                <div key={`${index}-${result.id}-${searchField}`} className='flap-in'>
                                     <ReleaseCard
                                         result={result}
                                         resolvedTheme={String(resolvedTheme)}
                                         ref={index === 0 ? cardRef : null}
-                                        index={index}
                                     />
                                 </div>
                             ))}
@@ -303,8 +298,8 @@ const SearchView = () => {
                             ))}
                         </div>
                         {!hasMoreResults(results, searchField) && (
-                            <div className='w-full h-[40px] index-numeral flex items-center justify-center pt-8'>
-                                END OF CATALOGUE — {page?.total ?? items.length} {searchField.toUpperCase()}
+                            <div className='board-rule caps-cell flex w-full items-center justify-center py-3 text-sm text-muted-foreground'>
+                                END OF THE BOARD — {page?.total ?? items.length} {searchField.toUpperCase()}
                             </div>
                         )}
                     </div>

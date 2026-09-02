@@ -5,11 +5,12 @@ intentions. The direction contract lives in `app/layout.tsx`.
 
 ## Identity
 
-**Crate** — a record crate you can play and empty. Listening and file-taking
-are one gesture; the shell carries player, catalogue, and transfers as equal
-citizens. Canon: Spotify (shell mechanics), Tidal (hi-res restraint), Bandcamp
-(collector warmth). Replaced the prior Gallery Blackout world (near-black
-exhibition void, acid-lime glow, hairline plates) wholesale.
+**Crate** — a station concourse for music. Listening and file-taking are one
+gesture, and the split-flap departure board is the one artifact built for
+exactly that job. The visual world is the **Split-Flap Concourse**: matte
+black flap faces on brushed steel, Oswald caps in fixed cells, amber lamps.
+It replaces both prior worlds — the near-black neon exhibition and the
+template-gray Canon shell — wholesale.
 
 ## Color — warm drenched dark
 
@@ -22,7 +23,7 @@ Art is the only saturated color. Chrome stays warm and near-neutral.
 | secondary / accent | `oklch(0.2690 0.0040 84.5)` ≈ #1F1F1F | hover, search pill fill |
 | sidebar | `oklch(0.1480 0.0036 84.5)` ≈ #0A0A0A | nav column, mobile legend |
 | border | `oklch(0.2980 0.0040 84.5)` | hairlines, one step above ground |
-| primary (lime) | `oklch(0.8587 0.1962 127.9)` ≈ #A3E635 | live state only: active nav marker, running transfer, Hi-Res badge, spinner |
+| primary (amber) | `oklch(0.7617 0.1546 70)` ≈ #FFB000 | live state only: active nav dot, running transfer row (lamp-amber), Hi-Res badge, spinner |
 
 Light theme mirrors the mapping with a deeper lime (`oklch(0.7686 0.1647 127.9)`) for contrast.
 

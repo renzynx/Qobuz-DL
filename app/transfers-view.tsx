@@ -5,22 +5,14 @@ import { Clock, Loader2 } from 'lucide-react';
 import { useStatusBar } from '@/lib/status-bar/context';
 
 /**
- * Transfers: the download queue as a page, not a pop-up.
- *
- * The queue state already lives in the status-bar provider — every download
- * registers its title and progress there — so this view is a read over that
- * state. Nothing is faked: an empty crate is an empty crate.
+ * Transfers: the live departure board. Every download is a departure — the
+ * row in flight carries the amber lamp, pending rows wait with the clock,
+ * and the board says so when nothing is moving. Real queue state only.
  */
 const TransfersView = () => {
     const { statusBar } = useStatusBar();
     const pending = statusBar.queue ?? [];
 
-    /**
-     * The active job never sits in `queue` — `createJob` registers queue
-     * entries only for jobs waiting behind a running one. The live job is
-     * carried by the status fields, so it is composed in here as the first
-     * row, with the pending ones behind it. Both sources, one list.
-     */
     const rows = useMemo(() => {
         const active = statusBar.processing
             ? [{ title: statusBar.title, UUID: 'active', running: true, remove: statusBar.onCancel }]
@@ -33,28 +25,33 @@ const TransfersView = () => {
 
     return (
         <section aria-label='Transfers'>
-            <div className='mb-6 flex items-baseline justify-between'>
-                <h1 className='text-2xl font-semibold tracking-tight text-foreground'>Transfers</h1>
-                <p className='index-numeral'>{rows.length === 0 ? 'IDLE' : `${rows.length} JOB${rows.length > 1 ? 'S' : ''}`}</p>
+            <div className='board-rule caps-cell mb-6 flex items-baseline justify-between border-b-0 py-2 text-sm text-foreground'>
+                <span>Departures</span>
+                <span className={rows.length === 0 ? 'text-muted-foreground' : 'text-primary'}>
+                    {rows.length === 0 ? 'BOARD CLEAR' : `${rows.length} IN FLIGHT`}
+                </span>
             </div>
 
             {rows.length === 0 ? (
-                <div className='rounded-lg border border-border bg-card p-10 text-center'>
-                    <p className='text-sm font-medium text-foreground'>Nothing in the queue.</p>
+                <div className='flap mx-auto max-w-xl p-10 text-center'>
+                    <p className='caps-cell text-sm text-foreground'>No departures.</p>
                     <p className='mt-2 text-sm text-muted-foreground'>
-                        Every release you download lands here while it moves — search for something and pull it in.
+                        Every release you download boards here while it moves — search the timetable and pull one in.
                     </p>
                 </div>
             ) : (
-                <ol className='flex flex-col gap-2'>
+                <ol className='flex flex-col'>
                     {rows.map((row) => (
-                        <li key={row.UUID} className='flex items-center gap-4 rounded-md border border-border bg-card px-4 py-3'>
+                        <li
+                            key={row.UUID}
+                            className={`board-rule flex items-center gap-4 px-4 py-3 ${row.running ? 'lamp-amber' : ''}`}
+                        >
                             {row.running ? (
                                 <Loader2 className='size-4 shrink-0 animate-spin text-primary' aria-hidden='true' />
                             ) : (
                                 <Clock className='size-4 shrink-0 text-muted-foreground' aria-hidden='true' />
                             )}
-                            <span className='min-w-0 flex-1 truncate text-sm font-medium text-foreground'>{row.title}</span>
+                            <span className='caps-cell min-w-0 flex-1 truncate text-sm text-foreground'>{row.title}</span>
                             {row.running && (
                                 <span className='index-numeral shrink-0 text-primary'>{Math.round(statusBar.progress * 100)}%</span>
                             )}
@@ -62,7 +59,7 @@ const TransfersView = () => {
                                 <button
                                     type='button'
                                     onClick={row.remove}
-                                    className='index-numeral shrink-0 rounded-sm px-2 py-1 transition-colors hover:text-destructive'
+                                    className='caps-cell lamp-red shrink-0 px-2 py-1 text-sm transition-colors hover:text-destructive'
                                 >
                                     Cancel
                                 </button>

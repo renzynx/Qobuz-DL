@@ -13,46 +13,46 @@ import { StatusBarProvider } from '@/lib/status-bar/context';
 import AppShell from '@/components/shell/app-shell';
 import HeaderActions from '@/components/shell/header-actions';
 import type { Metadata } from 'next';
-import { Geist, Instrument_Serif, JetBrains_Mono } from 'next/font/google';
+import { Geist, Instrument_Serif, JetBrains_Mono, Oswald } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 
 /*
-DESIGN CONTRACT — Crate, canon build (seed qobuz-dl-identity-2026)
+DESIGN CONTRACT — Crate × Split-Flap Concourse (seed split-flap-departure-board)
+Full replacement of the Canon gray world. The Canon passed only where it
+overlapped this world; every surface below is rebuilt in flap grammar.
 
-THESIS: A record crate you can play and empty. Crate is the only app where
-listening and taking the file with you are one gesture, so the shell carries
-player, catalogue AND transfers as equal citizens — not a downloader with a
-player bolted on. It refuses the incumbent's exhibition void (near-black plus
-one neon accent: the AI-default cluster this category always ships).
+THESIS: A station concourse for music. Crate is the only app where listening
+and taking the file with you are one gesture; the split-flap board is the one
+artifact built for exactly that job — rows of departures, one arriving, none
+waiting. It refuses both the prior worlds: the near-black neon exhibition and
+the template-gray SaaS shell they became.
 
-OWN-WORLD: Warm drenched dark — #121212 ground, #0A0A0A nav, #181818 raised
-card, #1F1F1F hover. One live accent, lime #A3E635, spent only on the thing
-that is happening right now: the active nav row, the playing equaliser, the
-transfer in flight. Album art is the only saturated color; chrome stays warm
-and near-neutral. Geist UI at 13-14px, instrument-serif nowhere, mono reserved
-for timings and counts. 8px radius on controls, 4px on rows, square art.
+OWN-WORLD: matte black flap faces on a brushed-steel ground; ONE condensed
+white face everywhere, characters in fixed cells, destinations in caps;
+amber lamp = the job in flight; dim red = cancelled; rows are ruled, columns
+never move, only flaps. Information arrives by flip cascade, never by fade.
 
-STORY: Visitor lands on Home — a Bandcamp-style weekly album spotlight, then
-their recent crates. Searches; results fill the main column as a dense art
-grid. Plays: the dock wakes. Downloads: the action flips to state
-(HyperCard's discipline), the sidebar Transfers row counts up (split-flap's
-row-level live update, never a modal), and the file lands.
+STORY: The visitor scans the board (catalogue rows, flipped into view),
+picks a departure (album), and watches it board (download) — amber lamp on,
+row level, flap by flap. The player is the station's platform announcement:
+quiet, persistent, always underfoot. Everything is a row on a board.
 
-FIRST VIEWPORT (1440x900): 224px nav left — wordmark, Search/Home/Transfers,
-then "Your Crate" playlists; translucent topbar with a single search pill;
-main column opens on a full-bleed weekly album spotlight with its Download
-control, then a "Recently played" art grid; player dock pinned across the
-bottom, art + title left, transport centre, transfers count right.
+FIRST VIEWPORT (1440×900): steel-grey shell; left column = the station
+name CRATE in flap tiles over Home/Search/Transfers; main column = the
+board: a hairline-ruled grid of departures, each row = square art cell +
+caps title/artist in flap cells + hi-res mark + actions on hover; topbar =
+thin steel band with the timetable search; floor = the platform dock with
+player + live transfer row. Mobile: the board narrows to priority columns.
 
-FORM: User-pinned canon (Spotify + Tidal + Bandcamp) — a brief-pinned
-decision beats the roll, so the canon is executed at full fidelity with the
-three declined challengers' disciplines raised into it: split-flap row-level
-live update, orienteering fixed-legend nav, HyperCard's action-flips-to-state.
+FORM: user-pinned replacement (split-flap concourse, challenger source
+signals-instruments-split-flap-concourse). Catalog grammar committed across
+navigation, content, controls, states, motion. Raises kept from earlier
+verdicts: orienteering fixed-legend nav; HyperCard action-flips-to-state.
 
-FINISH: unreviewed and undocumented is unfinished; this build ends with the
-finish review, the verdict, DESIGN.md, and every shipping raster carrying its
-provenance.
+FINISH: unreviewed and undocumented is unfinished; this build ends with
+the finish review, the verdict, DESIGN.md, and every shipping raster
+carrying its provenance.
 */
 
 const geist = Geist({
@@ -66,6 +66,13 @@ const instrumentSerif = Instrument_Serif({
     weight: '400',
     display: 'swap',
     variable: '--font-instrument-serif'
+});
+
+const oswald = Oswald({
+    subsets: ['latin'],
+    weight: ['400', '500', '600'],
+    display: 'swap',
+    variable: '--font-oswald'
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -94,7 +101,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
         <html lang='en' className='dark' suppressHydrationWarning>
-            <body className={`${geist.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} antialiased`} suppressHydrationWarning>
+            <body className={`${geist.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} ${oswald.variable} antialiased`} suppressHydrationWarning>
                 <FFmpegProvider>
                     <MotionProvider>
                         <CountryProvider>
@@ -116,7 +123,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                                                 {/* `max-h-dvh` caps the dock at the viewport so the expanded sheet
                                                     grows into that budget and scrolls internally, instead of
                                                     pushing the transport past the fold on a short screen. */}
-                                                <div className='sticky bottom-0 z-[30] flex w-full max-h-dvh flex-col border-t border-border bg-background'>
+                                                <div className='steel sticky bottom-0 z-[30] flex w-full max-h-dvh flex-col border-t border-border bg-background'>
                                                     <StatusBarContainer />
                                                     <PlayerBar />
                                                 </div>

@@ -73,7 +73,7 @@
     --color-destructive-foreground: var(--destructive-foreground);
 }
 
-/* Crate tokens — warm drenched dark; art is the only saturated color */
+/* Crate tokens — split-flap concourse: brushed steel ground, matte black flap faces, amber = live, dim red = cancelled */
 :root {
     --radius: 0.25rem;
     --background: oklch(0.9752 0.0054 95.3315);
@@ -82,7 +82,7 @@
     --card-foreground: oklch(0.1822 0.0043 106.5443);
     --popover: oklch(0.9940 0.0027 95.3315);
     --popover-foreground: oklch(0.1822 0.0043 106.5443);
-    --primary: oklch(0.7686 0.1647 127.9000);
+    --primary: oklch(0.7015 0.1320 70.0000);
     --primary-foreground: oklch(0.1822 0.0043 106.5443);
     --secondary: oklch(0.9340 0.0043 95.3315);
     --secondary-foreground: oklch(0.3019 0.0057 106.5443);
@@ -132,37 +132,37 @@
 }
 
 .dark {
-    --background: oklch(0.1855 0.0038 84.5000);
+    --background: oklch(0.2696 0.0050 250.0000);
     --foreground: oklch(0.9609 0.0029 106.4706);
-    --card: oklch(0.2386 0.0038 84.5000);
+    --card: oklch(0.1821 0.0030 250.0000);
     --card-foreground: oklch(0.9609 0.0029 106.4706);
-    --popover: oklch(0.2386 0.0038 84.5000);
+    --popover: oklch(0.2059 0.0035 250.0000);
     --popover-foreground: oklch(0.9609 0.0029 106.4706);
-    --primary: oklch(0.8587 0.1962 127.9000);
+    --primary: oklch(0.7617 0.1546 70.0000);
     --primary-foreground: oklch(0.1466 0.0043 261.2000);
-    --secondary: oklch(0.2690 0.0040 84.5000);
+    --secondary: oklch(0.2192 0.0040 250.0000);
     --secondary-foreground: oklch(0.9609 0.0029 106.4706);
-    --muted: oklch(0.2690 0.0040 84.5000);
-    --muted-foreground: oklch(0.7216 0.0048 84.5000);
-    --accent: oklch(0.2690 0.0040 84.5000);
+    --muted: oklch(0.2192 0.0040 250.0000);
+    --muted-foreground: oklch(0.6400 0.0100 250.0000);
+    --accent: oklch(0.3018 0.0055 250.0000);
     --accent-foreground: oklch(0.9609 0.0029 106.4706);
     --destructive: oklch(0.6290 0.1902 23.0704);
-    --border: oklch(0.2980 0.0040 84.5000);
-    --input: oklch(0.2980 0.0040 84.5000);
-    --ring: oklch(0.8587 0.1962 127.9000);
-    --chart-1: oklch(0.8587 0.1962 127.9000);
+    --border: oklch(0.3171 0.0060 250.0000);
+    --input: oklch(0.3018 0.0055 250.0000);
+    --ring: oklch(0.7617 0.1546 70.0000);
+    --chart-1: oklch(0.7617 0.1546 70.0000);
     --chart-2: oklch(0.7235 0.1410 76.5887);
     --chart-3: oklch(0.6290 0.1902 23.0704);
     --chart-4: oklch(0.6374 0.1009 191.3759);
     --chart-5: oklch(0.7058 0 0);
-    --sidebar: oklch(0.1480 0.0036 84.5000);
+    --sidebar: oklch(0.2360 0.0045 250.0000);
     --sidebar-foreground: oklch(0.9609 0.0029 106.4706);
-    --sidebar-primary: oklch(0.8587 0.1962 127.9000);
+    --sidebar-primary: oklch(0.7617 0.1546 70.0000);
     --sidebar-primary-foreground: oklch(0.1466 0.0043 261.2000);
     --sidebar-accent: oklch(0.2087 0.0047 261.2000);
     --sidebar-accent-foreground: oklch(0.9609 0.0029 106.4706);
-    --sidebar-border: oklch(0.2980 0.0040 84.5000);
-    --sidebar-ring: oklch(0.8587 0.1962 127.9000);
+    --sidebar-border: oklch(0.3171 0.0060 250.0000);
+    --sidebar-ring: oklch(0.7617 0.1546 70.0000);
     --destructive-foreground: oklch(1.0000 0 0);
     --radius: 0.25rem;
     --font-sans: Geist, sans-serif;
@@ -380,4 +380,105 @@ textarea {
     .animate-\[wordmark-in_600ms_cubic-bezier\(0\.22\,1\,0\.36\,1\)_both\] {
         animation: none;
     }
+}
+
+/* —— Split-Flap Concourse —— */
+
+/* The flap face: matte black tile with a hairline split at the waist, the
+   signature line of every split-flap cell. */
+.flap {
+    position: relative;
+    background: var(--flap-face, #101010);
+    border-radius: 2px;
+}
+.flap::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: color-mix(in oklab, #000 55%, transparent);
+}
+
+/* The board: rows ruled top and bottom, columns fixed. Only flaps change. */
+.board-rule {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+/* Brushed steel: a faint horizontal grain, the concourse's ground material. */
+.steel {
+    background-image: repeating-linear-gradient(
+        0deg,
+        color-mix(in oklab, var(--background) 92%, #fff 8%) 0px,
+        color-mix(in oklab, var(--background) 92%, #fff 8%) 1px,
+        var(--background) 1px,
+        var(--background) 3px
+    );
+}
+
+/* The flip cascade: rows arrive by a fast top-half/bottom-half flip, the
+   board's own motion, not a fade. Two keyframes; one authored moment. */
+@keyframes flap-in {
+    0% {
+        opacity: 0;
+        transform: rotateX(62deg);
+    }
+    60% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 1;
+        transform: rotateX(0deg);
+    }
+}
+.flap-in {
+    transform-origin: 50% 50%;
+    perspective: 600px;
+    animation: flap-in 260ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+
+/* Stagger: the cascade runs down the board, row after row. */
+.flap-in:nth-child(1) { animation-delay: 0ms; }
+.flap-in:nth-child(2) { animation-delay: 45ms; }
+.flap-in:nth-child(3) { animation-delay: 90ms; }
+.flap-in:nth-child(4) { animation-delay: 135ms; }
+.flap-in:nth-child(5) { animation-delay: 180ms; }
+.flap-in:nth-child(6) { animation-delay: 225ms; }
+.flap-in:nth-child(7) { animation-delay: 270ms; }
+
+/* Amber row lamp: the job in flight. Offset + blur carries depth; a bare
+   halo would be decoration. */
+.lamp-amber {
+    box-shadow:
+        inset 0 0 0 1px color-mix(in oklab, var(--primary) 60%, transparent),
+        0 2px 10px -2px color-mix(in oklab, var(--primary) 45%, transparent);
+}
+.lamp-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: var(--primary);
+    box-shadow: 0 0 6px 0 color-mix(in oklab, var(--primary) 60%, transparent);
+}
+
+/* Cancelled / dim red for errors and cancel affordances. */
+.lamp-red {
+    color: oklch(0.6280 0.1800 27.0000);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .flap-in,
+    .flap-in:nth-child(n) {
+        animation: none;
+    }
+}
+
+/* Caps-in-cells voice: the one condensed face of the board. */
+.caps-cell {
+    font-family: var(--font-oswald), var(--font-sans);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 500;
 }

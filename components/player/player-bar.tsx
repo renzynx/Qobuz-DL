@@ -53,7 +53,7 @@ const PlayerBar = () => {
                     event.preventDefault();
                     setExpanded((open) => !open);
                 }}
-                className='pointer-events-auto container flex shrink-0 cursor-pointer items-center gap-3 border border-border bg-card p-2'
+                className='steel pointer-events-auto container flex shrink-0 cursor-pointer items-center gap-3 border border-border bg-card p-2'
             >
                 <div className='relative size-11 shrink-0 overflow-hidden border border-border/60 bg-secondary'>
                     {track.album?.image?.small ? <img src={track.album.image.small} alt={title} className='size-full object-cover' /> : null}
@@ -72,7 +72,7 @@ const PlayerBar = () => {
                         size='icon'
                         aria-label={state.playing ? 'Pause' : 'Play'}
                         title={state.playing ? 'Pause' : 'Play'}
-                        className={`touch-manipulation active:scale-95 transition-transform${state.playing ? ' text-primary' : ''}`}
+                        className={`caps-cell touch-manipulation active:scale-95 transition-transform${state.playing ? ' text-primary' : ''}`}
                         onClick={(event) => {
                             // The bar behind these buttons expands on tap; a
                             // transport control must not also navigate.

@@ -2,21 +2,36 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Disc3, Home, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { APPLICATION_NAME } from '@/lib/app-config';
 import SearchBar from '@/components/search-bar/search-bar';
 import { useCrate } from '@/lib/crate';
 import { emitSearch } from '@/lib/search/bus';
-import { useRouter } from 'next/navigation';
 
 /**
- * The fixed navigation legend.
- *
- * Orienteering's discipline, raised into the canon: the legend is fixed and
- * never edits the terrain. Rows are plain text that gain weight and a lime
- * marker when active — Spotify's own rule, no icon chrome, no pill buttons.
+ * The station name in flap tiles — CRATE spelled the way the concourse
+ * spells everything, one character per cell, amber lamp for the letter
+ * that marks the live surface.
+ */
+const StationMark = () => (
+    <div className='flex gap-[3px] px-3' aria-label='Crate'>
+        {['C', 'R', 'A', 'T', 'E'].map((ch, i) => (
+            <span
+                key={i}
+                className={cn('flap flex size-8 items-center justify-center text-sm font-bold text-foreground', i === 2 && 'lamp-amber text-primary')}
+                aria-hidden='true'
+            >
+                {ch}
+            </span>
+        ))}
+    </div>
+);
+
+/**
+ * The fixed navigation legend — a station's line board: Home, Search,
+ * Transfers. Weight and an amber dot mark the platform you're on; the
+ * legend never edits the terrain.
  */
 const NAV = [
     { href: '/', label: 'Home', icon: Home },
@@ -28,7 +43,7 @@ function NavLegend() {
     const pathname = usePathname();
 
     return (
-        <nav className='flex flex-col gap-1 px-2' aria-label='Main'>
+        <nav className='flex flex-col gap-0.5 px-2' aria-label='Main'>
             {NAV.map(({ href, label, icon: Icon }) => {
                 const active = pathname === href;
                 return (
@@ -37,13 +52,13 @@ function NavLegend() {
                         href={href}
                         aria-current={active ? 'page' : undefined}
                         className={cn(
-                            'flex items-center gap-3 rounded-sm px-3 py-2 text-sm transition-colors',
+                            'flex items-center gap-3 px-3 py-2 text-sm transition-colors',
                             active ? 'font-semibold text-foreground' : 'font-medium text-muted-foreground hover:text-foreground'
                         )}
                     >
-                        <Icon className='size-5 shrink-0' strokeWidth={active ? 2.25 : 1.75} />
-                        <span className='truncate'>{label}</span>
-                        {active && <span className='ml-auto size-1.5 rounded-full bg-primary' aria-hidden='true' />}
+                        <Icon className='size-4 shrink-0' strokeWidth={active ? 2.5 : 1.75} />
+                        <span className='caps-cell truncate'>{label}</span>
+                        {active && <span className='lamp-dot ml-auto shrink-0' aria-hidden='true' />}
                     </Link>
                 );
             })}
@@ -52,35 +67,28 @@ function NavLegend() {
 }
 
 /**
- * The crate rail: saved searches from localStorage — real, user-owned data.
- *
- * A queue of what the collector has dug before. The list grows from actual
- * searches (see `useCrate`), so an untouched install honestly shows nothing
- * rather than a demo playlist. Counts are mono, per the contract.
+ * The crate rail: real pinned searches from localStorage. Departures you've
+ * looked up before, one tap from the timetable again. Honest empty state.
  */
 function CrateRail() {
     const crate = useCrate();
     const router = useRouter();
 
     return (
-        <div className='flex flex-col gap-1 px-2'>
-            <p className='index-numeral px-3 pb-1 pt-2 !text-foreground/80'>Your Crate</p>
-            {crate.entries.length === 0 && (
-                <p className='px-3 py-1.5 text-sm text-muted-foreground/70'>Searches you run will pin here.</p>
-            )}
+        <div className='flex flex-col gap-0.5 px-2'>
+            <p className='index-numeral px-3 pb-1 pt-4'>Dug here before</p>
+            {crate.entries.length === 0 && <p className='px-3 py-1.5 text-sm text-muted-foreground/70'>Searches you run pin here.</p>}
             {crate.entries.map((entry) => (
                 <button
                     key={entry}
                     type='button'
-                    className='flex items-center justify-start gap-2 rounded-sm px-3 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:text-foreground'
+                    className='flex items-center justify-start gap-2 px-3 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:text-foreground'
                     onClick={() => {
-                        // The results view lives on Home and mounts on arrival;
-                        // defer the search one tick so its listener exists first.
                         router.push('/');
                         setTimeout(() => emitSearch(entry), 400);
                     }}
                 >
-                    <span className='truncate'>{entry}</span>
+                    <span className='caps-cell truncate'>{entry}</span>
                 </button>
             ))}
         </div>
@@ -88,21 +96,15 @@ function CrateRail() {
 }
 
 /**
- * The three-column shell.
- *
- * Nav is a fixed 224px legend, the topbar a translucent bar over a scrolling
- * main column, and the floor dock spans the whole width beneath both — so the
- * player reads as part of the room rather than a panel floating over content.
- * Below `lg` the legend collapses to a bottom bar and the columns stack.
+ * The three-column concourse: steel left column (station), the board
+ * (main), and the platform dock across the floor. Below `lg` the legend
+ * moves to a bottom bar and the board stacks.
  */
 export default function AppShell({ children }: { children: React.ReactNode }) {
     return (
         <div className='flex min-h-dvh flex-col lg:flex-row'>
-            <header className='hidden w-56 shrink-0 flex-col gap-2 bg-sidebar p-2 lg:flex'>
-                <Link href='/' className='flex items-center gap-2 px-3 py-3'>
-                    <span className='size-6 rounded-sm bg-primary' aria-hidden='true' />
-                    <span className='text-base font-semibold tracking-tight text-foreground'>{APPLICATION_NAME}</span>
-                </Link>
+            <header className='steel hidden w-56 shrink-0 flex-col gap-3 border-r border-border bg-sidebar p-2 lg:flex'>
+                <StationMark />
                 <NavLegend />
                 <div className='mt-2 flex-1 overflow-y-auto'>
                     <CrateRail />
@@ -110,23 +112,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </header>
 
             <div className='flex min-w-0 flex-1 flex-col'>
-                <div className='sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-border/60 bg-background/80 px-4 backdrop-blur'>
-                    {/* The search pill is a shell fixture mounted here so it
-                        persists above every route, canon placement. The
-                        portal slot stays for the actions on the right. */}
+                <div className='steel sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-border px-4'>
                     <div className='min-w-0 flex-1 lg:max-w-md'>
                         <SearchBar />
                     </div>
                     <div id='shell-header-actions' className='ml-auto flex items-center gap-2' />
                 </div>
 
-                <main className='min-w-0 flex-1 px-4 py-6 lg:px-6'>{children}</main>
+                <main className='min-w-0 flex-1 px-4 py-6 lg:px-8'>{children}</main>
             </div>
 
-            <nav
-                aria-label='Main'
-                className='sticky bottom-0 z-20 flex border-t border-border bg-sidebar lg:hidden'
-            >
+            <nav aria-label='Main' className='steel sticky bottom-0 z-20 flex border-t border-border lg:hidden'>
                 <MobileLegend />
             </nav>
         </div>
@@ -144,13 +140,10 @@ function MobileLegend() {
                         key={href}
                         href={href}
                         aria-current={active ? 'page' : undefined}
-                        className={cn(
-                            'flex flex-1 flex-col items-center gap-1 py-2 text-[11px]',
-                            active ? 'text-foreground' : 'text-muted-foreground'
-                        )}
+                        className={cn('flex flex-1 flex-col items-center gap-1 py-2 text-[11px]', active ? 'text-foreground' : 'text-muted-foreground')}
                     >
-                        <Icon className='size-5' strokeWidth={active ? 2.25 : 1.75} />
-                        {label}
+                        <Icon className='size-5' strokeWidth={active ? 2.5 : 1.75} />
+                        <span className='caps-cell'>{label}</span>
                     </Link>
                 );
             })}

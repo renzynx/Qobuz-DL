@@ -13,8 +13,8 @@ describe('transfers view', () => {
 
     it('shows an honest empty state when nothing has ever been queued', () => {
         mount(<TransfersView />);
-        expect(screen.getByText('Nothing in the queue.')).toBeTruthy();
-        expect(screen.getByText('IDLE')).toBeTruthy();
+        expect(screen.getByText('No departures.')).toBeTruthy();
+        expect(screen.getByText('BOARD CLEAR')).toBeTruthy();
     });
 
     it('renders queued jobs as rows with the running one marked', async () => {
@@ -44,7 +44,7 @@ describe('transfers view', () => {
 
         expect(screen.getByText('Random Access Memories')).toBeTruthy();
         expect(screen.getByText('Discovery')).toBeTruthy();
-        expect(screen.getByText('2 JOBS')).toBeTruthy();
+        expect(screen.getByText('2 IN FLIGHT')).toBeTruthy();
         expect(screen.getByText('42%')).toBeTruthy();
         expect(screen.getByText('Cancel')).toBeTruthy();
     });

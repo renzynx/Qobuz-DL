@@ -53,14 +53,12 @@ const ReleaseCard = ({
     result,
     resolvedTheme,
     ref,
-    showArtistDialog,
-    index
+    showArtistDialog
 }: {
     result: QobuzAlbum | QobuzTrack | QobuzArtist;
     resolvedTheme: string;
     ref?: React.Ref<HTMLDivElement>;
     showArtistDialog?: boolean;
-    index?: number;
 }) => {
     if (typeof showArtistDialog === 'undefined') showArtistDialog = true;
     const { ffmpegState } = useFFmpeg();
@@ -88,8 +86,8 @@ const ReleaseCard = ({
     const { country } = useCountry();
 
     return (
-        <div className='space-y-2' title={formatTitle(result)} ref={ref || undefined}>
-            <div className='relative w-full aspect-square group select-none rounded-none overflow-hidden bg-card border border-border/60 transition-colors group-hover:border-primary/40'>
+        <div className='flap-in space-y-2' title={formatTitle(result)} ref={ref || undefined}>
+            <div className='flap board-rule relative aspect-square w-full select-none overflow-hidden transition-colors group-hover:border-primary/50'>
                 <div
                     className={cn(
                         'w-full z-[3] top-0 left-0 absolute transition-all aspect-square opacity-100 pointer-events-none pointer-hover:opacity-0 pointer-hover:group-hover:opacity-100 pointer-hover:focus-within:opacity-100',
@@ -256,17 +254,16 @@ const ReleaseCard = ({
                 <div className='flex gap-1.5 items-center'>
                     {(result as QobuzAlbum | QobuzTrack).parental_warning && (
                         <p
-                            className='text-[9px] font-mono text-primary border border-primary/60 p-0.5 rounded-none aspect-square w-[18px] h-[18px] text-center justify-center items-center shrink-0 flex font-semibold'
+                            className='flap flex aspect-square h-[18px] w-[18px] shrink-0 items-center justify-center text-center text-[9px] font-semibold text-primary'
                             title='Explicit'
                         >
                             E
                         </p>
                     )}
-                    <h1 className='text-[13px] leading-snug truncate font-medium text-foreground group-hover:text-primary transition-colors'>{formatTitle(result)}</h1>
+                    <h1 className='caps-cell truncate text-[13px] leading-snug text-foreground transition-colors group-hover:text-primary'>{formatTitle(result)}</h1>
                 </div>
                 {!item.isArtist && (
-                    <div className='text-[11px] truncate flex gap-x-1.5 items-center text-muted-foreground' title={item.artists}>
-                        <span className='index-numeral shrink-0'>{typeof index === 'number' ? String(index + 1).padStart(2, '0') : '—'}</span>
+                    <div className='caps-cell truncate text-[11px] text-muted-foreground' title={item.artists}>
                         <span className='truncate'>{item.artists}</span>
                     </div>
                 )}
@@ -339,7 +336,7 @@ const ReleaseCard = ({
                                             <div key={track.id}>
                                                 <div
                                                     className={cn(
-                                                        'flex items-center justify-between gap-2 overflow-hidden hover:bg-accent transition-all p-2 rounded-none group',
+                                                        'flex items-center justify-between gap-2 overflow-hidden border-b border-border/60 p-2 transition-colors hover:bg-accent group',
                                                         !track.streamable && 'opacity-50'
                                                     )}
                                                 >
