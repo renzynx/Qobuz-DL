@@ -14,7 +14,8 @@ import { useSettings } from '@/lib/settings-provider';
 import { useTheme } from 'next-themes';
 import CountryPicker from '@/components/country-picker';
 import { useCountry } from '@/lib/country-provider';
-import { onSearchEvent, onSearchingEvent } from '@/lib/search/bus';
+import { onSearchEvent, emitSearch, emitSearching } from '@/lib/search/bus';
+import { useCrate } from '@/lib/crate';
 
 const rowsMap = {
     sm: 3,
@@ -26,6 +27,46 @@ const rowsMap = {
 };
 
 const MAX_SKELETONS = 30;
+
+/**
+ * The honest home: what this browser has actually dug, re-runnable.
+ * No editorial — an empty crate says so.
+ */
+const RecentlyDug = () => {
+    const crate = useCrate();
+
+    if (crate.entries.length === 0) {
+        return (
+            <section className='mb-8 rounded-lg border border-border bg-card p-10'>
+                <p className='index-numeral'>Start digging</p>
+                <h1 className='mt-4 max-w-xl text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl'>
+                    Every record you pull lands here.
+                </h1>
+                <p className='mt-4 max-w-lg text-sm leading-relaxed text-muted-foreground'>
+                    Search above. Results play in the bar, and any release can be taken with you — downloads and their progress live under Transfers.
+                </p>
+            </section>
+        );
+    }
+
+    return (
+        <section className='mb-8'>
+            <h1 className='mb-4 text-2xl font-semibold tracking-tight text-foreground'>Recently dug</h1>
+            <div className='flex flex-wrap gap-2'>
+                {crate.entries.map((entry) => (
+                    <button
+                        key={entry}
+                        type='button'
+                        onClick={() => emitSearch(entry)}
+                        className='rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent'
+                    >
+                        {entry}
+                    </button>
+                ))}
+            </div>
+        </section>
+    );
+};
 
 const SearchView = () => {
     const { resolvedTheme } = useTheme();
@@ -42,20 +83,6 @@ const SearchView = () => {
     const inFlight = useRef<AbortController | null>(null);
     const requestId = useRef(0);
 
-    // The shell's pill publishes searches on the bus; this view executes them.
-    // The handler rides a ref so the subscription binds once while `onSearch`
-    // stays live — a dependency-free effect keeps the compiler's memoization.
-    const searchHandler = useRef<(query: string) => void>(() => {});
-    searchHandler.current = (query: string) => void onSearch(query);
-
-    useEffect(() => {
-        const offQuery = onSearchEvent((query) => searchHandler.current(query));
-        const offSearching = onSearchingEvent(setSearching);
-        return () => {
-            offQuery();
-            offSearching();
-        };
-    }, []);
 
     const routeFor = useCallback(
         (field: QobuzSearchFilters) => {
@@ -75,6 +102,7 @@ const SearchView = () => {
 
             setQuery(nextQuery);
             setSearchError('');
+            setSearching(true);
 
             try {
                 const response = await getApiClient().get<QobuzSearchResults>(
@@ -109,6 +137,23 @@ const SearchView = () => {
         },
         [routeFor, searchField, country]
     );
+
+    // The shell's pill publishes searches; this view executes them and owns
+    // the busy truth, broadcasting it back so the pill can clear its spinner.
+    useEffect(() => {
+        emitSearching(searching);
+    }, [searching]);
+
+    useEffect(() => {
+        const offQuery = onSearchEvent((query) => void onSearch(query));
+        return () => offQuery();
+    }, [onSearch]);
+
+    // The shell's pill publishes searches on the bus; this view executes them.
+    // Re-subscribing on each `onSearch` identity is one add/removeEventListener
+    // pair — the compiler keeps the plain useCallbacks intact.
+
+
 
     const fetchMore = useCallback(async () => {
         if (loading) return;
@@ -189,22 +234,7 @@ const SearchView = () => {
 
     return (
         <>
-            {!results && (
-                <section className='relative mb-8 overflow-hidden rounded-lg border border-border bg-card' aria-label='Album of the week'>
-                    <div className='flex flex-col gap-6 p-6 md:p-10'>
-                        <p className='index-numeral'>Album of the week</p>
-                        <h1 className='max-w-xl text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl'>
-                            Dug out of the crate, every Monday
-                        </h1>
-                        <p className='max-w-lg text-sm leading-relaxed text-muted-foreground'>
-                            Hand-picked by the operators of this instance — the record they have had on the turntable, in hi-res.
-                        </p>
-                        <p className='index-numeral'>
-                            Start digging with the search above — every result plays here, and any release can be taken with you.
-                        </p>
-                    </div>
-                </section>
-            )}
+            {!results && <RecentlyDug />}
 
             <div className='space-y-4'>
                 <div className='flex flex-col items-start justify-center'>

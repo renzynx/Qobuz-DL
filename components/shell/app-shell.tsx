@@ -7,6 +7,9 @@ import { Disc3, Home, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { APPLICATION_NAME } from '@/lib/app-config';
 import SearchBar from '@/components/search-bar/search-bar';
+import { useCrate } from '@/lib/crate';
+import { emitSearch } from '@/lib/search/bus';
+import { useRouter } from 'next/navigation';
 
 /**
  * The fixed navigation legend.
@@ -49,31 +52,35 @@ function NavLegend() {
 }
 
 /**
- * The crate rail: what the collector has already pulled.
+ * The crate rail: saved searches from localStorage — real, user-owned data.
  *
- * Deliberately authored content — a real crate holds favourites and oddities,
- * not a tidy grid of equal cards. Counts are mono, per the contract.
+ * A queue of what the collector has dug before. The list grows from actual
+ * searches (see `useCrate`), so an untouched install honestly shows nothing
+ * rather than a demo playlist. Counts are mono, per the contract.
  */
-const CRATE = [
-    { title: 'Late Night Pressings', count: 42 },
-    { title: 'Hi-Res Finds', count: 18 },
-    { title: 'Bass Weight', count: 67 },
-    { title: 'Sunday Strings', count: 9 },
-    { title: 'Dug Last Winter', count: 31 }
-];
-
 function CrateRail() {
+    const crate = useCrate();
+    const router = useRouter();
+
     return (
         <div className='flex flex-col gap-1 px-2'>
             <p className='index-numeral px-3 pb-1 pt-2 !text-foreground/80'>Your Crate</p>
-            {CRATE.map((c) => (
+            {crate.entries.length === 0 && (
+                <p className='px-3 py-1.5 text-sm text-muted-foreground/70'>Searches you run will pin here.</p>
+            )}
+            {crate.entries.map((entry) => (
                 <button
-                    key={c.title}
+                    key={entry}
                     type='button'
-                    className='flex items-baseline justify-between gap-2 rounded-sm px-3 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:text-foreground'
+                    className='flex items-center justify-start gap-2 rounded-sm px-3 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:text-foreground'
+                    onClick={() => {
+                        // The results view lives on Home and mounts on arrival;
+                        // defer the search one tick so its listener exists first.
+                        router.push('/');
+                        setTimeout(() => emitSearch(entry), 400);
+                    }}
                 >
-                    <span className='truncate'>{c.title}</span>
-                    <span className='index-numeral shrink-0'>{c.count}</span>
+                    <span className='truncate'>{entry}</span>
                 </button>
             ))}
         </div>

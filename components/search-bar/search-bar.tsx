@@ -10,7 +10,7 @@ import { QobuzSearchResults } from '@/lib/qobuz-dl';
 import AutocompleteCard from './autocomplete-card';
 import { useCountry } from '@/lib/country-provider';
 import CountryPicker from '../country-picker';
-import { emitSearch, emitSearching } from '@/lib/search/bus';
+import { emitSearch, onSearchingEvent } from '@/lib/search/bus';
 
 /**
  * The shell's search pill: self-contained state, publishing through the
@@ -81,9 +81,10 @@ const SearchBar = () => {
         fetchResults();
     }, [searchInput]);
 
-    useEffect(() => {
-        emitSearching(searching);
-    }, [searching]);
+    // The results view owns the busy truth and broadcasts it; the pill only
+    // mirrors, so a search finishing anywhere clears the spinner.
+    useEffect(() => onSearchingEvent(setSearching), []);
+
 
     const pill = (
         <div className='flex items-center gap-2 relative w-full'>
